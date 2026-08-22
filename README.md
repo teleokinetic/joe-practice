@@ -11,3 +11,5 @@ Single-file PWA for Joe's Personal Training for Meditators client dashboard. Mir
 **Offline:** `sw.js` precaches the shell (cache name `joe-map-v2`) and caches the MP3s listed in its `AUDIO` array best-effort with Range support. `copy.json` is never served from cache.
 
 **Audio:** `audio/emotional-inquiry.mp3` (Joe Hudson, Art of Accomplishment — free at view.life/ei) is this week's practice. Tanner's own pain-practice recordings replace/join it later: drop the file in `audio/`, point the player at it in `joe-src.html`, add it to `AUDIO` in `sw.js`, bump the cache name, re-run `wrap.py`.
+
+**Icon:** `icon.svg` is the source (rolling hills + a point in the sky — the Practice Map template mark). Recolour per client, then regenerate `icon-512.png` (master), `icon-maskable-512.png` (same art; safe zone holds), `icon-192.png`, `apple-touch-icon.png` (180).

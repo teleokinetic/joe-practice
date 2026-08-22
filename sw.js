@@ -3,7 +3,7 @@
    Joe Hudson's Emotional Inquiry) are cached best-effort at install and served with Range
    support so seeking works offline. Add Tanner's own recordings here when they land and bump
    CACHE. copy.json is never served from cache (the app fetches it with cache: 'no-store'). */
-var CACHE = "joe-map-v2";
+var CACHE = "joe-map-v3";
 var SHELL = ["./", "./index.html", "./manifest.webmanifest",
              "./icon-192.png", "./icon-512.png", "./apple-touch-icon.png"];
 var AUDIO = ["./audio/emotional-inquiry.mp3"];
