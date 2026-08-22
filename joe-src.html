@@ -1,0 +1,1016 @@
+<title>Joe's Practice Map</title>
+<!--
+  Joe's Practice Map — live site source (2026-08-22), B "Today first" skin on every screen. Generated into index.html by wrap.py.
+  Same architecture and JS as the vault proof (home → screens, #edit copy mode with data-keys,
+  "Copy for Claude", quick-note sheet, Strength day-screen port). Audio: audio/emotional-inquiry.mp3 this week; Tanner's
+  recordings join it later. Mobile-first single column (max 480px) — no desktop shell.
+  For GitHub Pages, wrap in the usual <!doctype html><html><head>…</head><body>…</body></html>
+  and add manifest.webmanifest + sw.js + icons as in mikes-plan.
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&family=Source+Sans+3:wght@400;500;600;700&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&display=swap">
+<style>
+/* ---- 1. tokens ---- */
+:root {
+  color-scheme: light;
+  --bg:#FAF7F1; --raised:#F1EBDE; --raised-2:#E9E1CF; --card:#FFFDF9;
+  --text:#2E2A24; --head:#2B3442; --soft:#4A463E; --muted:#665F51;
+  --accent:#3A5A80; --accent-hover:#2E4A6B; --wash:rgba(58,90,128,.10); --danger:#8A3B2E;
+  --rule:#E3DBCB; --rule-strong:#CBC1AC; --ink:#FBF9F4;
+  --display:"Newsreader","Iowan Old Style",Palatino,Georgia,serif;
+  --serif:"Source Serif 4",Georgia,serif;
+  --sans:"Source Sans 3","Helvetica Neue",Arial,system-ui,sans-serif;
+  --r:20px; --r-hero:24px; --r-in:14px; --col:480px;
+  --edge: max(16px, calc((100% - var(--col)) / 2 + 16px));
+}
+
+/* ---- 2. base ---- */
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html { -webkit-text-size-adjust: 100%; }
+html, body { background: var(--bg); }
+body { margin: 0; color: var(--text); font: 17px/1.5 var(--serif); -webkit-font-smoothing: antialiased; min-height: 100dvh; }
+a { color: var(--accent); }
+::selection { background: var(--accent); color: var(--ink); }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 6px; }
+button { -webkit-tap-highlight-color: transparent; font: inherit; color: inherit; }
+main { max-width: var(--col); margin: 0 auto; padding: calc(14px + env(safe-area-inset-top, 0px)) 16px calc(28px + env(safe-area-inset-bottom, 0px)); }
+artifact-local { display: contents; }
+.screen { display: none; }
+.screen[data-local-active] { display: block; }
+
+/* ---- 3. shared pieces ---- */
+.lbl { margin: 0; font: 600 13px/1.3 var(--sans); color: var(--accent); }
+.topbar { display: flex; align-items: center; justify-content: space-between; min-height: 44px; margin-bottom: 14px; padding-right: 56px; }
+.wordmark { font: 400 22px/1.1 var(--display); color: var(--accent); }
+.back { border: 0; background: none; cursor: pointer; min-height: 44px; padding: 0 12px 0 0; display: inline-flex; align-items: center; font: 600 15px/1 var(--sans); color: var(--accent); }
+.stitle { font: 400 30px/1.1 var(--display); color: var(--head); margin: 0 0 4px; text-wrap: balance; }
+.sintro { margin: 0 0 14px; font: 15px/1.4 var(--sans); color: var(--muted); }
+.footnote { margin: 14px 0 0; font: 15px/1.4 var(--sans); color: var(--muted); }
+.card { background: var(--card); border: 1px solid var(--rule); border-radius: var(--r); padding: 16px; }
+.soft { background: var(--raised); border: 0; }
+.chev { flex: none; stroke: var(--accent); }
+/* buttons: filled pill · outline pill · wash pill · bare */
+.send { display: inline-flex; align-items: center; justify-content: center; min-height: 44px; padding: 0 20px; border: 0; border-radius: 999px; background: var(--accent); color: var(--ink); font: 700 15px/1 var(--sans); cursor: pointer; transition: background .15s ease; }
+.send[disabled] { opacity: .55; cursor: default; }
+.ghost { display: inline-flex; align-items: center; justify-content: center; min-height: 40px; padding: 0 16px; border: 1px solid var(--rule-strong); border-radius: 999px; background: var(--card); color: var(--accent); font: 600 15px/1 var(--sans); cursor: pointer; }
+.ghost.danger { color: var(--danger); border-color: transparent; background: none; text-decoration: underline; text-underline-offset: 3px; padding: 0 8px; }
+.pillbtn { display: inline-flex; align-items: center; min-height: 40px; padding: 0 16px; border: 0; border-radius: 999px; background: var(--wash); color: var(--accent); font: 600 15px/1 var(--sans); cursor: pointer; }
+.reset { border: 0; background: none; cursor: pointer; min-height: 44px; padding: 0 0 0 12px; display: inline-flex; align-items: center; font: 600 13px/1 var(--sans); color: var(--muted); text-decoration: underline; text-underline-offset: 3px; }
+.nstatus { font: 15px/1.4 var(--sans); color: var(--muted); }
+.nstatus.err { color: var(--danger); font-weight: 600; }
+p.nstatus { margin: 8px 0 0; }
+
+/* ---- 4. quick note: round + button top-right on every screen, sheet drops under it ---- */
+#fab { position: fixed; z-index: 30; top: calc(14px + env(safe-area-inset-top, 0px)); right: var(--edge); width: 44px; height: 44px; border: 0; border-radius: 50%; background: var(--wash); color: var(--accent); display: grid; place-items: center; cursor: pointer; transition: background .15s ease; }
+#fab svg { stroke: currentColor; }
+#sheet { position: fixed; z-index: 31; top: calc(66px + env(safe-area-inset-top, 0px)); right: var(--edge); left: var(--edge); max-width: 448px; margin-left: auto; background: var(--card); border: 1px solid var(--rule); border-radius: var(--r); padding: 16px; box-shadow: 0 1px 2px rgba(46,42,36,.08), 0 12px 32px rgba(46,42,36,.14); max-height: calc(100dvh - 90px); overflow: auto; }
+#sheet .lbl { margin-bottom: 8px; }
+#sheet textarea { width: 100%; min-height: 6rem; max-height: 30dvh; resize: vertical; font: 17px/1.5 var(--serif); color: var(--text); background: var(--bg); border: 1px solid var(--rule-strong); border-radius: var(--r-in); padding: 10px 12px; }
+#sheet .rowb { display: flex; gap: 8px; justify-content: flex-end; margin-top: 12px; }
+body[data-local-edit] #fab, body[data-local-edit] #sheet { display: none; }
+
+/* ---- 5. edit bar (Tanner: open with #edit) ---- */
+#editbar { display: none; position: sticky; top: 0; z-index: 25; align-items: center; gap: 8px 12px; flex-wrap: wrap; padding: calc(8px + env(safe-area-inset-top, 0px)) var(--edge) 8px; background: rgba(250,247,241,.94); backdrop-filter: blur(8px); border-bottom: 1px solid var(--rule); font: 13px/1.4 var(--sans); color: var(--muted); }
+body[data-local-edit] #editbar { display: flex; }
+#editbar .grow { flex: 1 1 auto; }
+#editbar .st { min-width: 4rem; text-align: right; font: 600 12px/1.4 var(--sans); color: var(--accent); }
+#editbar button { min-height: 36px; padding: 0 14px; border: 1px solid var(--rule-strong); border-radius: 999px; background: var(--card); color: var(--accent); font: 600 14px/1 var(--sans); cursor: pointer; }
+#editbar .edn { flex-basis: 100%; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; padding-top: 6px; border-top: 1px solid var(--rule); margin-top: 2px; }
+#editbar .ednl { font: 600 12px/1 var(--sans); color: var(--muted); margin-right: 2px; }
+#editbar .edn button { min-height: 32px; padding: 0 12px; font-size: 13px; border-color: var(--rule); color: var(--muted); }
+#editbar .edn button.on { background: var(--accent); border-color: var(--accent); color: var(--ink); }
+/* an emptied copy slot vanishes for Joe (label and all) and comes back in edit mode so it can be refilled */
+.fn:has(> .ed:empty), p.footnote.ed:empty, .pstep:has(> .lbody > .exname:empty), .exbody.ed:empty { display: none; }
+body[data-local-edit] .fn:has(> .ed:empty), body[data-local-edit] .pstep:has(> .lbody > .exname:empty) { display: grid; }
+body[data-local-edit] p.footnote.ed:empty, body[data-local-edit] .exbody.ed:empty { display: block; min-height: 1.2em; }
+body[data-local-edit] .fn:has(> .ed:empty) { display: block; }
+body[data-local-edit] .ed { outline: 1px dashed rgba(58,90,128,.35); outline-offset: 2px; border-radius: 2px; cursor: text; }
+body[data-local-edit] .ed:focus { outline: 2px solid var(--accent); outline-offset: 2px; }
+body[data-local-edit] .edlink { display: none; }
+.edlink { display: none; color: var(--accent); background: none; border: 0; padding: 12px 0; margin: -12px 0; cursor: pointer; font: 13px/1.4 var(--sans); text-decoration: underline; text-underline-offset: 3px; }
+footer { max-width: var(--col); margin: 0 auto; padding: 0 16px calc(24px + env(safe-area-inset-bottom, 0px)); display: flex; justify-content: space-between; gap: 12px 16px; flex-wrap: wrap; font: 13px/1.4 var(--sans); color: var(--muted); }
+
+/* ---- 6. home ---- */
+.hero { position: relative; width: 100%; text-align: left; cursor: pointer; background: var(--raised-2); border: 0; border-radius: var(--r-hero); padding: 18px 18px 16px; display: flex; flex-direction: column; gap: 6px; }
+.hero .glyph { position: absolute; top: 16px; right: 16px; opacity: .35; stroke: var(--accent); }
+.hero .hname { font: 400 28px/1.1 var(--display); color: var(--head); padding-right: 56px; text-wrap: balance; }
+.hero .hsub { font: 15px/1.35 var(--sans); color: var(--soft); }
+.hero .cta { margin-top: 12px; align-self: flex-start; display: inline-flex; align-items: center; gap: 8px; height: 42px; padding: 0 16px 0 14px; border-radius: 999px; background: var(--accent); color: var(--ink); font: 700 15px/1 var(--sans); }
+.hero .cta svg { fill: var(--ink); flex: none; }
+.two { margin-top: 12px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.tile { min-height: 136px; display: flex; flex-direction: column; gap: 4px; text-align: left; cursor: pointer; transition: border-color .15s ease; }
+.tile .tname { font: 400 24px/1.1 var(--display); color: var(--head); }
+.tile .tsub { font: 14px/1.35 var(--sans); color: var(--muted); }
+.tile .tlast { margin-top: auto; padding-top: 10px; font: 600 13px/1.3 var(--sans); color: var(--accent); }
+.also { gap: 5px; }
+.also .lbl { margin-bottom: 2px; }
+.arow { font: 14px/1.35 var(--sans); color: var(--text); }
+.arow .an { font-weight: 600; }
+.arow .dose { color: var(--muted); margin-left: .25em; }
+.pills { margin-top: 14px; display: flex; flex-wrap: wrap; gap: 8px; }
+.goal { margin-top: 14px; padding: 14px 18px 16px; display: flex; flex-direction: column; gap: 6px; }
+.goal .gline { font: italic 400 18px/1.3 var(--display); color: var(--text); text-wrap: pretty; }
+.goal .know { font: 14px/1.35 var(--sans); color: var(--soft); }
+.goal .know .k { font-weight: 600; }
+.home-foot { margin-top: 18px; display: flex; justify-content: space-between; align-items: center; gap: 12px; font: 13px/1.4 var(--sans); color: var(--muted); }
+
+/* ---- 7. pain ---- */
+.paud { display: grid; grid-template-columns: 44px minmax(0, 1fr); column-gap: 12px; align-items: start; }
+.paud .play { width: 44px; height: 44px; border-radius: 50%; background: var(--accent); display: grid; place-items: center; }
+.paud .play svg { fill: var(--ink); margin-left: 2px; }
+.paud .lbody { display: flex; flex-direction: column; gap: 4px; }
+.paud .meta { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
+.exname { font: 600 17px/1.3 var(--serif); color: var(--text); text-wrap: balance; }
+.dur { font: 600 13px/1.4 var(--sans); color: var(--muted); white-space: nowrap; }
+.exbody { font: 15px/1.4 var(--sans); color: var(--soft); }
+.fn { display: block; font: 13px/1.4 var(--sans); color: var(--muted); }
+.fn .fk { font-weight: 600; color: var(--text); margin-right: .35em; }
+.paud .scrub { margin-top: 6px; height: 3px; border-radius: 2px; background: var(--rule); }
+.paud .player { width: 100%; height: 40px; margin-top: 8px; display: block; }
+.paud .credit { margin-top: 2px; }
+.chip { display: inline-block; font: 600 12px/1.3 var(--sans); color: var(--muted); background: var(--raised); border-radius: 999px; padding: 3px 10px; }
+.psec { margin: 18px 0 8px; }
+.moves { padding: 2px 16px; }
+.pstep { display: grid; grid-template-columns: 24px minmax(0, 1fr); column-gap: 12px; align-items: start; padding: 12px 0; border-top: 1px solid var(--rule); }
+.pstep:first-child { border-top: 0; }
+.pstep .pn { padding-top: 3px; font: 600 13px/1.4 var(--sans); color: var(--muted); }
+.pstep .lbody { display: flex; flex-direction: column; gap: 3px; }
+.pstep .exbody { color: var(--muted); }
+
+/* ---- 8. strength ---- */
+.trail { display: flex; align-items: center; gap: 6px; margin: 2px 0 10px; flex-wrap: wrap; min-height: 14px; }
+.trail-pip { width: 11px; height: 11px; flex: none; border-radius: 4px 4px 4px 1.5px; border: 1.5px solid var(--rule-strong); }
+.trail-pip.on { background: var(--accent); border-color: var(--accent); }
+.trail-count { margin-left: 4px; font: 600 13px/1.4 var(--sans); color: var(--muted); font-variant-numeric: tabular-nums; }
+.restdock { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: var(--bg); padding: 6px 0 10px; margin: 0 -16px 2px; padding-left: 16px; padding-right: 16px; }
+.restdock::before { content: ''; position: absolute; left: 0; right: 0; bottom: 100%; height: env(safe-area-inset-top, 0px); background: var(--bg); }
+body[data-local-edit] .restdock { top: 52px; }
+.rest-running { position: relative; overflow: hidden; background: var(--card); border: 1px solid var(--rule); border-radius: 999px; padding: 11px 16px 11px 20px; }
+.rest-fill { position: absolute; top: 0; bottom: 0; left: 0; width: 0; background: var(--raised-2); border-right: 2px solid var(--accent); transition: width .25s linear; }
+.rest-row { position: relative; display: flex; align-items: center; gap: 10px; }
+.rest-time { font: 700 32px/1 var(--sans); color: var(--head); font-variant-numeric: tabular-nums; min-width: 4.5rem; }
+.rest-label { flex: 1; min-width: 0; font: 14px/1.3 var(--sans); color: var(--muted); }
+.rest-mini { width: 40px; height: 40px; flex: none; border-radius: 50%; background: var(--raised); border: 1px solid var(--rule-strong); color: var(--muted); font: 16px var(--sans); cursor: pointer; }
+.rest-done { width: 100%; background: var(--accent); color: var(--ink); border: 0; border-radius: 999px; min-height: 48px; padding: 12px; font: 700 16px/1.2 var(--sans); cursor: pointer; animation: restpulse .9s ease-in-out infinite alternate; }
+@keyframes restpulse { from { filter: brightness(1); } to { filter: brightness(1.12); } }
+.slots { display: grid; gap: 10px; grid-template-columns: minmax(0, 1fr); }
+.slot { background: var(--card); border: 1px solid var(--rule); border-radius: var(--r); padding: 14px 16px; display: grid; grid-template-columns: 25px minmax(0, 1fr) auto; column-gap: 10px; row-gap: 2px; align-items: start; }
+.slot-head { display: contents; }
+.slot .ring { grid-column: 1; grid-row: 1; align-self: start; margin-top: -1px; }
+.slot-name { grid-column: 2; grid-row: 1; font: 600 17px/1.3 var(--serif); color: var(--text); text-wrap: balance; }
+.slot-target { grid-column: 3; grid-row: 1; padding-top: 3px; font: 600 13px/1.4 var(--sans); color: var(--muted); text-align: right; max-width: 8rem; font-variant-numeric: tabular-nums; }
+.slot-cue { grid-column: 2 / 4; display: block; font: 15px/1.4 var(--sans); color: var(--text); }
+.slot-sub { grid-column: 2 / 4; display: block; font: 15px/1.4 var(--sans); color: var(--muted); }
+.setline { grid-column: 2; align-self: center; font: 600 13px/1.4 var(--sans); color: var(--accent); font-variant-numeric: tabular-nums; }
+.setline.hidden { display: none; }
+.slot-foot { grid-column: 3; justify-self: end; align-self: center; display: flex; align-items: center; gap: 10px; margin: -2px 0 -4px; }
+.notebtn { position: relative; margin: 0 -6px 0 0; padding: 2px 6px; background: none; border: 0; cursor: pointer; font: 600 13px/1.4 var(--sans); color: var(--muted); text-decoration: underline; text-underline-offset: 3px; }
+.notebtn::before { content: ''; position: absolute; inset: -11px -6px; }
+.notebtn.has-note { color: var(--accent); font-weight: 700; text-decoration-thickness: 2px; }
+.note-edit { grid-column: 2 / 4; }
+.note-edit textarea { width: 100%; min-height: 3.2rem; resize: vertical; font: 17px/1.5 var(--serif); color: var(--text); background: var(--bg); border: 1px solid var(--rule-strong); border-radius: var(--r-in); padding: 8px 12px; margin-top: 4px; }
+.pairmat { background: var(--raised); border-radius: var(--r-hero); padding: 8px; display: grid; gap: 8px; }
+.pairtag { display: flex; align-items: center; gap: 7px; padding: 4px 8px 2px 12px; font: 600 13px/1.4 var(--sans); color: var(--accent); flex-wrap: wrap; }
+.pairtag svg { width: 14px; height: 14px; flex: none; }
+.pairmat.done .pairtag { display: none; }
+.ring { width: 25px; height: 25px; flex: none; border-radius: 50%; border: 2px solid var(--rule-strong); background: var(--bg); position: relative; padding: 0; cursor: pointer; }
+.ring::before { content: ''; position: absolute; inset: -12px; }
+.ring.on { background: var(--accent); border-color: var(--accent); }
+.ring.on::after { content: '✓'; position: absolute; inset: 0; display: grid; place-items: center; color: var(--ink); font-family: var(--sans); font-size: 13px; font-weight: 700; }
+.ring.counting, .ring.counting.on { background: transparent; border: none; }
+.ring.counting.on::after { content: none; }
+.ring.counting svg { position: absolute; inset: 0; width: 25px; height: 25px; }
+.ring-track { fill: none; stroke: var(--rule-strong); stroke-width: 2.5; }
+.ring-arc { fill: none; stroke: var(--accent); stroke-width: 3; stroke-linecap: round; transform: rotate(-90deg); transform-origin: center; transition: stroke-dashoffset .2s ease; }
+.ring.counting.on .ring-track { fill: var(--accent); stroke: var(--accent); }
+.ring-count { position: absolute; inset: 0; display: grid; place-items: center; font: 600 13px/1 var(--sans); color: var(--accent); font-variant-numeric: tabular-nums; }
+.ring.counting.on .ring-count { color: var(--ink); font-weight: 700; }
+.slot.done { padding-top: 10px; padding-bottom: 10px; }
+.slot.done .slot-name, .slot.done .slot-target { opacity: .45; }
+.slot.done .slot-cue, .slot.done .slot-sub, .slot.done .slot-foot, .slot.done .note-edit, .slot.done .setline { display: none; }
+.finishbtn { width: 100%; margin-top: 14px; border: 1px solid var(--rule-strong); background: var(--card); color: var(--accent); border-radius: 999px; min-height: 48px; padding: 12px; font: 700 16px/1.2 var(--sans); cursor: pointer; }
+.finish-wrap { display: flex; flex-direction: column; gap: 10px; margin-top: 12px; }
+.finish-line { font: 400 20px/1.3 var(--display); color: var(--head); }
+.recap { background: var(--card); border: 1px solid var(--rule); border-radius: var(--r); padding: 10px 16px 4px; }
+.recap-head { margin-bottom: 4px; font: 600 13px/1.4 var(--sans); color: var(--accent); }
+.rrow { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; padding: 8px 0; border-top: 1px solid var(--rule); }
+.rrow:first-child { border-top: 0; }
+.rrow-name { font: 600 15px/1.4 var(--serif); color: var(--text); }
+.rrow-note { color: var(--accent); font-style: normal; font-size: 13px; margin-left: .3rem; }
+.rrow-num { font: 13px/1.4 var(--sans); color: var(--muted); white-space: nowrap; font-variant-numeric: tabular-nums; }
+.recap-extra { color: var(--muted); font: 13px/1.4 var(--sans); padding: 8px 0; border-top: 1px solid var(--rule); }
+.finish-wrap .nbox { margin-top: 0; min-height: 4.5rem; }
+.send-row { display: flex; align-items: center; gap: 8px 12px; margin-top: 12px; flex-wrap: wrap; }
+.sec { margin-top: 20px; display: flex; flex-direction: column; gap: 4px; }
+.nl { margin: 0; font-size: 17px; line-height: 1.45; color: var(--soft); }
+.nl .k { font-weight: 600; color: var(--text); }
+.hist { padding: 8px 0; border-top: 1px solid var(--rule); display: flex; flex-direction: column; gap: 2px; }
+.hist .d { font: 600 13px/1.4 var(--sans); color: var(--muted); }
+.hist .s { font: 15px/1.4 var(--sans); color: var(--soft); font-variant-numeric: tabular-nums; }
+.hist .s i { color: var(--muted); }
+.setrow { display: flex; gap: 8px 12px; flex-wrap: wrap; align-items: center; margin-top: 12px; font: 15px/1.4 var(--sans); color: var(--soft); }
+.setrow .setlabel { min-width: 5.5rem; font: 600 13px/1.4 var(--sans); color: var(--muted); }
+.setrow .nstatus:not(:empty) { flex-basis: 100%; }
+.seg { display: inline-flex; border: 1px solid var(--rule-strong); border-radius: 999px; overflow: hidden; background: var(--card); }
+.seg button { font: 600 13px/1 var(--sans); min-height: 40px; padding: 0 14px; color: var(--muted); background: none; border: 0; cursor: pointer; }
+.seg button.on { background: var(--accent); color: var(--ink); }
+.version { margin-top: 12px; font: 11px/1.4 var(--sans); color: var(--muted); }
+
+/* ---- 9. library · principles ---- */
+.lrow { display: block; text-decoration: none; color: inherit; margin-top: 10px; }
+.lrow .lbody { display: flex; flex-direction: column; gap: 4px; }
+.lrow .go { display: inline-flex; align-items: center; gap: 4px; margin-top: 8px; font: 600 15px/1 var(--sans); color: var(--accent); }
+.prow { margin-top: 10px; padding: 14px 16px; font: 400 20px/1.3 var(--display); color: var(--text); text-wrap: pretty; }
+.prow small { display: block; margin-top: 4px; font: italic 400 14px/1.4 var(--serif); color: var(--muted); }
+
+/* ---- 10. weekly note ---- */
+textarea.nbox { width: 100%; min-height: 7.5rem; resize: vertical; font: 17px/1.5 var(--serif); color: var(--text); background: var(--card); border: 1px solid var(--rule-strong); border-radius: var(--r-in); padding: 12px 14px; margin-top: 4px; }
+.qlist { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.qlist li { position: relative; display: flex; flex-direction: column; gap: 4px; padding: 12px 44px 12px 14px; background: var(--card); border: 1px solid var(--rule); border-radius: var(--r-in); }
+.qhead { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.qlist .d { font: 600 13px/1.4 var(--sans); color: var(--muted); white-space: nowrap; }
+.qctx { font: 600 12px/1.3 var(--sans); color: var(--accent); background: var(--wash); border-radius: 999px; padding: 2px 9px; }
+.qt { font: 15px/1.45 var(--serif); color: var(--text); white-space: pre-wrap; }
+.qx { position: absolute; top: 4px; right: 4px; width: 40px; height: 40px; border: 0; background: none; color: var(--muted); font-size: 18px; line-height: 1; cursor: pointer; border-radius: 50%; display: grid; place-items: center; }
+.qmore { margin-top: 8px; display: flex; flex-direction: column; gap: 8px; align-items: flex-start; }
+.qmore .qlist { width: 100%; }
+.qtoggle, #copyall { padding-left: 0; min-height: 40px; }
+.nhist { margin-top: 16px; }
+.nh-item { padding: 8px 0; border-top: 1px solid var(--rule); }
+.nh-date { font: 600 13px/1.4 var(--sans); color: var(--muted); }
+.nh-text { margin: 4px 0 0; font: 15px/1.4 var(--sans); color: var(--soft); white-space: pre-wrap; }
+
+/* ---- 11. hover · active · motion ---- */
+@media (hover: hover) and (pointer: fine) {
+  .tile:hover, .lrow:hover { border-color: var(--rule-strong); }
+  .send:hover, .hero:hover .cta { background: var(--accent-hover); }
+  .ghost:hover, .finishbtn:hover, #editbar button:hover { border-color: var(--accent); }
+  #fab:hover, .pillbtn:hover { background: rgba(58,90,128,.16); }
+}
+.tile:active, .lrow:active { border-color: var(--rule-strong); background: var(--bg); }
+.hero:active { filter: brightness(.98); }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+</style>
+
+<artifact-local>
+<div id="editbar">
+  <span>Editing copy — tap any text to change it. Changes save as you type.</span>
+  <span class="grow"></span>
+  <span class="st" id="edst"></span>
+  <button id="copyAll" type="button">Copy for Claude</button>
+  <button id="editDone" type="button">Done</button>
+  <div class="edn" id="edn" aria-label="Go to screen">
+    <span class="ednl">Screen</span>
+    <button type="button" data-go="home">Home</button>
+    <button type="button" data-go="pain">Pain</button>
+    <button type="button" data-go="strength">Strength</button>
+    <button type="button" data-go="library">Library</button>
+    <button type="button" data-go="principles">Principles</button>
+    <button type="button" data-go="note">Weekly note</button>
+  </div>
+</div>
+</artifact-local>
+
+<main>
+
+<!-- ================= HOME ================= -->
+<section id="screen-home" class="screen" data-local-active>
+  <div class="topbar">
+    <span class="wordmark ed" data-key="title">Joe's Practice Map</span>
+  </div>
+
+  <button class="hero" type="button" onclick="go('pain'); playPain();">
+    <svg class="glyph" width="44" height="44" viewBox="0 0 44 44" fill="none" stroke-width="2.2" aria-hidden="true"><circle cx="22" cy="22" r="17"></circle><circle cx="22" cy="22" r="4" fill="#3A5A80" stroke="none"></circle></svg>
+    <span class="hname ed" data-key="week.pain.name">Relationship to pain</span>
+    <span class="hsub ed" data-key="week.pain.body">Four times a week. Become familiar and friendly with the feelings around the pain.</span>
+    <span class="cta"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4.5v15l12-7.5z"></path></svg><span class="ed" data-key="week.pain.cta">Emotional inquiry · 11 min</span></span>
+  </button>
+
+  <div class="two">
+    <button class="card tile" type="button" onclick="go('strength')">
+      <span class="tname ed" data-key="week.strength.name">Strength</span>
+      <span class="tsub ed" data-key="week.strength.body">Twice a week, about fifteen minutes.</span>
+      <artifact-local><span class="tlast" id="st-tlast"></span></artifact-local>
+    </button>
+    <div class="card soft tile also">
+      <p class="lbl ed" data-key="week.also.label">Also this week</p>
+      <div class="arow"><span class="an ed" data-key="week.run.name">Run-walk</span><span class="dose ed" data-key="week.run.dose">2–3×</span></div>
+      <div class="arow"><span class="an ed" data-key="week.snacks.name">Movement Snacks</span><span class="dose ed" data-key="week.snacks.dose">anytime</span></div>
+      <div class="arow"><span class="an ed" data-key="week.floor.name">Floor time</span><span class="dose ed" data-key="week.floor.dose">whenever</span></div>
+    </div>
+  </div>
+
+  <div class="pills">
+    <button class="pillbtn" type="button" onclick="go('library')"><span class="ed" data-key="card.library.title">Library</span></button>
+    <button class="pillbtn" type="button" onclick="go('principles')"><span class="ed" data-key="card.principles.title">Principles</span></button>
+    <button class="pillbtn" type="button" onclick="go('note')"><span class="ed" data-key="card.note.title">Your notes</span></button>
+  </div>
+
+  <div class="card goal">
+    <p class="lbl ed" data-key="headed.label">Where you're headed</p>
+    <p class="gline ed" data-key="headed.sentence" style="margin:0">Let's define this more clearly next week. For now, the aim is understand and feel into your relationship with chronic pain.</p>
+  </div>
+
+  <div class="home-foot">
+    <span class="ed" data-key="wordmark">Personal Training for Meditators</span>
+    <artifact-local><button id="editToggle" class="edlink" type="button">Edit copy</button></artifact-local>
+  </div>
+</section>
+
+<!-- ================= RELATIONSHIP TO PAIN ================= -->
+<section id="screen-pain" class="screen">
+  <div class="topbar"><button class="back" type="button" onclick="go('home')">‹ Home</button></div>
+  <div class="stitle ed" role="heading" aria-level="2" data-key="pain.title">Relationship to pain</div>
+  <p class="sintro ed" data-key="pain.intro">This week is about getting familiar. No need to fix anything: just meeting the feelings around pain with curiosity and kindness.</p>
+
+  <div class="card paud">
+    <span class="play" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 24 24"><path d="M7 4.5v15l12-7.5z"></path></svg></span>
+    <div class="lbody">
+      <div class="meta"><div class="exname ed" data-key="pain.full.name">Emotional inquiry</div><span class="dur ed" data-key="pain.full.dur">11 min</span></div>
+      <div class="exbody ed" data-key="pain.full.what"></div>
+      <span class="fn"><span class="fk ed" data-key="pain.full.before.k">Before you begin</span><span class="ed" data-key="pain.full.before"></span></span>
+      <span class="fn"><span class="fk ed" data-key="pain.full.fk">After</span><span class="ed" data-key="pain.full.fn"></span></span>
+      <audio class="player" id="pain-audio" controls preload="none" src="audio/emotional-inquiry.mp3"></audio>
+      <span class="fn credit ed" data-key="pain.full.credit">Joe Hudson · Art of Accomplishment</span>
+    </div>
+  </div>
+
+  <p class="lbl psec ed" data-key="pain.steps.label">Practice outline</p>
+  <div class="card moves">
+    <div class="pstep"><span class="pn">1</span><div class="lbody">
+      <div class="exname ed" data-key="pain.s1.name">Settle</div>
+      <div class="exbody ed" data-key="pain.s1.body">Feet — weight, gravity, soften. Pelvic floor settling. Diaphragm moving, relaxing. Bottom of the throat: let the back of the neck rest on that foundation.</div>
+    </div></div>
+    <div class="pstep"><span class="pn">2</span><div class="lbody">
+      <div class="exname ed" data-key="pain.s2.name">Visit the neck and hands</div>
+      <div class="exbody ed" data-key="pain.s2.body">If something is there, three questions: what shape, how big, what temperature. Find the exact line where the sensation ends and you begin. Notice that the pain alarm is real, but that its increased since the diagnosis -- but nothing has changed structurally. If there's no pain present, great.</div>
+    </div></div>
+    <div class="pstep"><span class="pn">3</span><div class="lbody">
+      <div class="exname ed" data-key="pain.s3.name">Feel the feelings around the pain</div>
+      <div class="exbody ed" data-key="pain.s3.body">Find the vigilant feeling — the one who has been on the lookout for discomfort since the diagnosis. Where does it live in your body? Step inside it and look around. Then one playful move: wave at it, or thank it for getting you to the doctor. Appreciate its care.</div>
+    </div></div>
+    <div class="pstep"><span class="pn">4</span><div class="lbody">
+      <div class="exname ed" data-key="pain.s4.name">Rest</div>
+      <div class="exbody ed" data-key="pain.s4.body">Find something pleasurable in the body. Rest there for a few breaths.</div>
+    </div></div>
+    <div class="pstep"><span class="pn">5</span><div class="lbody">
+      <div class="exname ed" data-key="pain.s5.name">Welcome it, then play</div>
+      <div class="exbody ed" data-key="pain.s5.body">From within it, welcome it completely. Then play with it: listen (what does it want to say?), tickle it, poke it, ignore it, push on it, resist it, wave at it, hug it, welcome it back, and thank it for its service. Finish with gratitude.</div>
+    </div></div>
+  </div>
+  <p class="footnote ed" data-key="pain.foot"></p>
+</section>
+
+<!-- ================= STRENGTH ================= -->
+<section id="screen-strength" class="screen">
+  <div class="topbar"><button class="back" type="button" onclick="go('home')">‹ Home</button></div>
+  <div class="stitle ed" role="heading" aria-level="2" data-key="st.title">Strength</div>
+  <p class="sintro ed" data-key="st.intro">Four movements in two pairs. Twice a week, about fifteen minutes, wherever you are.</p>
+  <artifact-local>
+  <div class="trail" id="st-trail"></div>
+  <div class="restdock" id="st-dock" hidden></div>
+  </artifact-local>
+  <div class="slots">
+  <div class="slot" data-mv="warm" data-sets="0">
+    <div class="slot-head"><artifact-local><button class="ring" type="button" data-action="ring" aria-label="Mark done"></button></artifact-local><span class="slot-name ed" data-key="st.warm.name">Space Dragon + Small Dance</span><span class="slot-target ed" data-key="st.warm.target">8–10 breaths</span></div>
+    <span class="slot-cue ed" data-key="st.warm.cue">Warm-up: ten breath cycles, then one minute of the small dance.</span>
+    <artifact-local>
+    <div class="slot-foot"><button class="notebtn" type="button" data-action="note">✎ note</button></div>
+    <div class="note-edit" hidden><textarea rows="2" data-action="notetext" placeholder="What happened?"></textarea></div>
+    </artifact-local>
+  </div>
+  <div class="pairmat" data-pair="1">
+    <div class="pairtag"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><path d="M7 8h13m0 0-3-3m3 3-3 3M17 16H4m0 0 3-3m-3 3 3 3"></path></svg><span class="ed" data-key="st.p1.tag">Pair · alternate sets</span><span>· rest <span data-pairrest>0:30</span> between</span></div>
+  <div class="slot" data-mv="stork" data-sets="2">
+    <div class="slot-head"><artifact-local><button class="ring" type="button" data-action="ring" aria-label="Mark done"></button></artifact-local><span class="slot-name ed" data-key="st.stork.name">Stork squat</span><span class="slot-target ed" data-key="st.stork.target">2×8–12 /side</span></div>
+    <span class="slot-cue ed" data-key="st.stork.cue">Pelvis level, knee tracking over the foot</span>
+    <artifact-local><div class="setline hidden" data-setline></div></artifact-local>
+    <artifact-local>
+    <div class="slot-foot"><button class="notebtn" type="button" data-action="note">✎ note</button></div>
+    <div class="note-edit" hidden><textarea rows="2" data-action="notetext" placeholder="What happened?"></textarea></div>
+    </artifact-local>
+  </div>
+  <div class="slot" data-mv="pushup" data-sets="2">
+    <div class="slot-head"><artifact-local><button class="ring" type="button" data-action="ring" aria-label="Mark done"></button></artifact-local><span class="slot-name ed" data-key="st.pushup.name">Push-up</span><span class="slot-target ed" data-key="st.pushup.target">2×8–12</span></div>
+    <span class="slot-cue ed" data-key="st.pushup.cue">Three seconds on the way down, leaving two or three reps in reserve.</span>
+    <artifact-local><div class="setline hidden" data-setline></div></artifact-local>
+    <artifact-local>
+    <div class="slot-foot"><button class="notebtn" type="button" data-action="note">✎ note</button></div>
+    <div class="note-edit" hidden><textarea rows="2" data-action="notetext" placeholder="What happened?"></textarea></div>
+    </artifact-local>
+  </div>
+  </div>
+  <div class="pairmat" data-pair="2">
+    <div class="pairtag"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><path d="M7 8h13m0 0-3-3m3 3-3 3M17 16H4m0 0 3-3m-3 3 3 3"></path></svg><span class="ed" data-key="st.p2.tag">Pair · alternate sets</span><span>· rest <span data-pairrest>0:30</span> between</span></div>
+  <div class="slot" data-mv="hinge" data-sets="2">
+    <div class="slot-head"><artifact-local><button class="ring" type="button" data-action="ring" aria-label="Mark done"></button></artifact-local><span class="slot-name ed" data-key="st.hinge.name">Kickstand Hinge</span><span class="slot-target ed" data-key="st.hinge.target">2×8–12 /side</span></div>
+    <span class="slot-cue ed" data-key="st.hinge.cue">Using a weight or backpack. Flat back, knees over feet.</span>
+    <artifact-local><div class="setline hidden" data-setline></div></artifact-local>
+    <artifact-local>
+    <div class="slot-foot"><button class="notebtn" type="button" data-action="note">✎ note</button></div>
+    <div class="note-edit" hidden><textarea rows="2" data-action="notetext" placeholder="What happened?"></textarea></div>
+    </artifact-local>
+  </div>
+  <div class="slot" data-mv="row" data-sets="2">
+    <div class="slot-head"><artifact-local><button class="ring" type="button" data-action="ring" aria-label="Mark done"></button></artifact-local><span class="slot-name ed" data-key="st.row.name">One-arm row</span><span class="slot-target ed" data-key="st.row.target">2×8–12 /side</span></div>
+    <span class="slot-cue ed" data-key="st.row.cue">Backpack loaded with your home weights. Three seconds up, three down.</span>
+    <span class="slot-sub ed" data-key="st.row.sub">When you can do 12 with reps to spare, add a little weight to the bag.</span>
+    <artifact-local><div class="setline hidden" data-setline></div></artifact-local>
+    <artifact-local>
+    <div class="slot-foot"><button class="notebtn" type="button" data-action="note">✎ note</button></div>
+    <div class="note-edit" hidden><textarea rows="2" data-action="notetext" placeholder="What happened?"></textarea></div>
+    </artifact-local>
+  </div>
+  </div>
+  <div class="slot" data-mv="floor" data-sets="0">
+    <div class="slot-head"><artifact-local><button class="ring" type="button" data-action="ring" aria-label="Mark done"></button></artifact-local><span class="slot-name ed" data-key="st.floor.name">The floor game</span><span class="slot-target ed" data-key="st.floor.target">as long as you like</span></div>
+    <span class="slot-cue ed" data-key="st.floor.cue">Finish with the squat-floor game you already do, for as long as you're enjoying it.</span>
+    <artifact-local>
+    <div class="slot-foot"><button class="notebtn" type="button" data-action="note">✎ note</button></div>
+    <div class="note-edit" hidden><textarea rows="2" data-action="notetext" placeholder="What happened?"></textarea></div>
+    </artifact-local>
+  </div>
+  </div>
+
+  <artifact-local>
+  <button class="finishbtn" id="st-finish" type="button">Finish session</button>
+  <div class="finish-wrap" id="st-panel" hidden>
+    <div class="finish-line" id="st-finishline"></div>
+    <div class="recap"><div class="recap-head">Will save</div><div id="st-recap"></div></div>
+    <textarea class="nbox" id="st-sessnote" placeholder="Session note (optional)"></textarea>
+    <div class="send-row"><button class="send" id="st-save" type="button">Save session</button><button class="ghost" id="st-notyet" type="button">Not yet</button></div>
+  </div>
+  <p class="nstatus" id="st-status"></p>
+  </artifact-local>
+
+  <div class="sec">
+    <p class="lbl ed" data-key="st.notice.label">What you'll notice</p>
+    <p class="nl ed" data-key="st.notice.1">In four to eight weeks, you should feel stronger.</p>
+    <p class="nl ed" data-key="st.notice.2">You feel it picking your daughter up off the floor. A more robust knee in the crouch, likely; running a little easier; a lift in energy and mood.</p>
+  </div>
+
+  <div class="sec">
+    <p class="lbl ed" data-key="st.hist.label">Past sessions</p>
+    <p class="footnote ed" id="st-empty" data-key="st.hist.empty" style="margin-top:0">Nothing here yet — your first finished session lands here.</p>
+    <artifact-local>
+    <div id="st-hist"></div>
+    <div class="setrow"><span class="setlabel">Rest</span><span class="seg" id="st-restseg"><button type="button" data-rest="30">30 s</button><button type="button" data-rest="45">45 s</button><button type="button" data-rest="60">60 s</button></span></div>
+    <div class="setrow"><span class="setlabel">Your data</span><button class="ghost" id="st-copy" type="button">Copy</button><button class="ghost" id="st-import" type="button">Import</button><button class="ghost danger" id="st-erase" type="button">Erase</button><span class="nstatus" id="st-dstatus"></span></div>
+    <div class="finish-wrap" id="st-importbox" hidden><textarea class="nbox" id="st-importtext" placeholder="Paste a copied Practice Map strength export here. Replaces everything."></textarea><div class="send-row"><button class="send" id="st-import-load" type="button">Load</button><button class="ghost" id="st-import-cancel" type="button">Cancel</button></div></div>
+    <p class="version" id="st-version"></p>
+    </artifact-local>
+  </div>
+</section>
+
+<!-- ================= LIBRARY ================= -->
+<section id="screen-library" class="screen">
+  <div class="topbar"><button class="back" type="button" onclick="go('home')">‹ Home</button></div>
+  <div class="stitle ed" role="heading" aria-level="2" data-key="library.title">Library</div>
+  <p class="sintro ed" data-key="library.intro">Practice recordings.</p>
+  <a class="card lrow" href="https://youtu.be/kOFQGXPjXrY" target="_blank" rel="noopener">
+    <span class="lbody">
+      <span class="exname ed" data-key="lib.1.name">Attuning to Spaciousness While Moving</span>
+      <span class="exbody ed" data-key="lib.1.what">Finding the space that is always available by inhabiting your body in the environment.</span>
+    </span>
+    <span class="go">Listen ↗</span>
+  </a>
+  <a class="card lrow" href="https://youtu.be/GnDqNwKVMtM" target="_blank" rel="noopener">
+    <span class="lbody">
+      <span class="exname ed" data-key="lib.2.name">Connecting Pelvis and Head</span>
+      <span class="exbody ed" data-key="lib.2.what">Experiencing your pelvis and head as intimately connected via the communication channel of the spine.</span>
+    </span>
+    <span class="go">Listen ↗</span>
+  </a>
+  <a class="card lrow" href="https://youtu.be/JyaOVCCcAa8" target="_blank" rel="noopener">
+    <span class="lbody">
+      <span class="exname ed" data-key="lib.3.name">Everything Communicates</span>
+      <span class="exbody ed" data-key="lib.3.what">When one part of the body moves, the whole body responds.</span>
+    </span>
+    <span class="go">Listen ↗</span>
+  </a>
+</section>
+
+<!-- ================= PRINCIPLES ================= -->
+<section id="screen-principles" class="screen">
+  <div class="topbar"><button class="back" type="button" onclick="go('home')">‹ Home</button></div>
+  <div class="stitle ed" role="heading" aria-level="2" data-key="principles.title">Principles</div>
+  <p class="sintro ed" data-key="principles.intro">Just a few things that have resonated along the way.</p>
+  <div class="card prow"><span class="ed" data-key="p.1">One part moves, everything responds.</span><small class="ed" data-key="p.1.src">Everything Communicates</small></div>
+  <div class="card prow"><span class="ed" data-key="p.2">Decrease the effort to sense finer differences.</span></div>
+  <div class="card prow"><span class="ed" data-key="p.3">An uninterrupted breath can be a barometer of unnecessary effort.</span><small class="ed" data-key="p.3.src">Tilting the Triangle</small></div>
+  <div class="card prow"><span class="ed" data-key="p.7">The best position is the next position.</span><small class="ed" data-key="p.7.src">Movement snacks and posture at work</small></div>
+</section>
+
+<!-- ================= YOUR NOTES ================= -->
+<section id="screen-note" class="screen">
+  <div class="topbar"><button class="back" type="button" onclick="go('home')">‹ Home</button><artifact-local><button class="reset" type="button" onclick="clearNote()">Clear draft</button></artifact-local></div>
+  <div class="stitle ed" role="heading" aria-level="2" data-key="note.title">Your notes</div>
+  <p class="sintro ed" data-key="note.intro">Feel free to share me any notes that come up.</p>
+  <p class="lbl ed" data-key="note.compose.label">What are you noticing?</p>
+  <artifact-local>
+    <textarea class="nbox" id="note-main" placeholder="This week…"></textarea>
+    <div class="send-row">
+      <button class="send" id="send" type="button">Send to Tanner</button>
+      <button class="ghost" id="copy" type="button">Copy</button>
+      <span class="nstatus" id="nstatus"></span>
+    </div>
+    <div class="nhist" id="nhist"></div>
+  </artifact-local>
+  <p class="lbl psec ed" data-key="note.list.label">Notes you've added</p>
+  <artifact-local>
+    <p class="footnote" id="qempty" style="margin-top:0">Nothing yet — tap + on any screen to jot one. Notes from a strength session land here too.</p>
+    <p class="footnote" id="qnone" style="margin-top:0" hidden>Nothing new since you last shared.</p>
+    <ul class="qlist" id="qlist"></ul>
+    <div class="qmore" id="qmore"></div>
+    <button class="reset" id="copyall" type="button" hidden>Copy all notes</button>
+  </artifact-local>
+  <p class="footnote ed" data-key="note.foot">Notes you send land in Tanner's inbox. If sending fails, your mail app opens with the note filled in.</p>
+</section>
+
+</main>
+
+<button id="fab" type="button" artifact-local aria-controls="sheet" aria-expanded="false" aria-label="Quick note"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg></button>
+<div id="sheet" artifact-local hidden>
+  <p class="lbl" id="sheet-lbl">Quick note</p>
+  <textarea id="sheet-text" placeholder="What did you notice?"></textarea>
+  <div class="rowb">
+    <button class="ghost" id="sheet-cancel" type="button">Cancel</button>
+    <button class="send" id="sheet-save" type="button">Save</button>
+  </div>
+</div>
+
+<script>
+/* ---------- navigation (per-viewer) ---------- */
+var SCREENS = ['home', 'pain', 'strength', 'library', 'principles', 'note'];
+function go(name, force) {
+  if (document.body.hasAttribute('data-local-edit') && !force) return; /* editing copy: cards don't navigate — use the edit bar's screen row */
+  SCREENS.forEach(function (s) {
+    var el = document.getElementById('screen-' + s);
+    if (s === name) el.setAttribute('data-local-active', ''); else el.removeAttribute('data-local-active');
+  });
+  document.querySelectorAll('#edn button[data-go]').forEach(function (b) { b.classList.toggle('on', b.getAttribute('data-go') === name); });
+  window.scrollTo(0, 0);
+}
+/* hero tap: open the pain screen and, where a player exists, start it in the same gesture */
+function playPain() { var a = document.getElementById('pain-audio'); if (a && a.paused) { try { var p = a.play(); if (p && p.catch) p.catch(function () {}); } catch (e) {} } }
+document.getElementById('edn').addEventListener('click', function (ev) { var b = ev.target.closest('button[data-go]'); if (b) go(b.getAttribute('data-go'), true); });
+
+/* ---------- copy editing (Tanner: open with #edit) ----------
+   Edited copy is keyed by data-key. It is kept in three places, best first:
+   1. copy.json alongside this page (the artifact's own files-publish — survives for every viewer),
+   2. this browser's localStorage (survives reloads on this device),
+   3. the clipboard via "Copy for Claude". On load: copy.json → localStorage → the page's defaults. */
+var EDS = Array.prototype.slice.call(document.querySelectorAll('.ed'));
+var CKEY = 'joe-map-copy-v1';
+var edst = document.getElementById('edst'), edT;
+function note(msg, hold) { edst.textContent = msg; clearTimeout(edT); if (!hold) edT = setTimeout(function () { edst.textContent = ''; }, 1800); }
+function collect() { var o = {}; EDS.forEach(function (el) { var k = el.getAttribute('data-key'); if (k) o[k] = el.textContent; }); return o; }
+function apply(o) { if (!o) return; EDS.forEach(function (el) { var k = el.getAttribute('data-key'); if (k && typeof o[k] === 'string') el.textContent = o[k]; }); }
+function setEdit(on) {
+  EDS.forEach(function (el) { if (on) el.setAttribute('contenteditable', 'true'); else el.removeAttribute('contenteditable'); });
+  if (on) { document.body.setAttribute('data-local-edit', ''); window.scrollTo(0, 0); var cur = SCREENS.filter(function (s) { return document.getElementById('screen-' + s).hasAttribute('data-local-active'); })[0] || 'home'; document.querySelectorAll('#edn button[data-go]').forEach(function (b) { b.classList.toggle('on', b.getAttribute('data-go') === cur); }); } else document.body.removeAttribute('data-local-edit');
+  if (!on && location.hash === '#edit') { try { history.replaceState(null, '', location.pathname + location.search); } catch (e) {} }
+}
+/* keep edited text plain: no rich paste, no line breaks inside a text leaf */
+EDS.forEach(function (el) {
+  el.addEventListener('paste', function (e) {
+    e.preventDefault();
+    var t = (e.clipboardData || window.clipboardData).getData('text/plain').replace(/\s+/g, ' ');
+    try { document.execCommand('insertText', false, t); } catch (err) { el.textContent += t; }
+  });
+  el.addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); el.blur(); } });
+});
+document.getElementById('editToggle').onclick = function () { setEdit(true); };
+/* load: copy.json (artifact files) → localStorage → defaults */
+(function loadCopy() {
+  var local = null; try { local = JSON.parse(localStorage.getItem(CKEY) || 'null'); } catch (e) {}
+  if (local) apply(local);
+  try {
+    fetch('copy.json', { cache: 'no-store' }).then(function (r) { return r.ok ? r.json() : null; }).then(function (remote) {
+      if (remote && typeof remote === 'object') { apply(remote); try { localStorage.setItem(CKEY, JSON.stringify(remote)); } catch (e) {} }
+    }).catch(function () {});
+  } catch (e) {}
+})();
+if (location.hash === '#edit') setEdit(true);
+window.addEventListener('hashchange', function () { setEdit(location.hash === '#edit'); });
+document.getElementById('editDone').onclick = function () { setEdit(false); };
+/* save: localStorage immediately; artifact files-publish after a 2.5 s pause */
+var artNS = null, artTried = false, artDead = false, pubT = null, dirty = false;
+function getArt() {
+  if (artTried) return Promise.resolve(artNS);
+  artTried = true;
+  try {
+    if (window.claude && typeof window.claude.use === 'function') return window.claude.use('artifact').then(function (ns) { artNS = ns || null; return artNS; }, function () { return null; });
+  } catch (e) {}
+  return Promise.resolve(null);
+}
+function pushRemote() {
+  if (!dirty || artDead) return;
+  getArt().then(function (ns) {
+    if (!ns || typeof ns.publish !== 'function') { artDead = true; note('saved on this device', true); return; }
+    var payload = JSON.stringify(collect());
+    note('syncing…', true);
+    ns.publish({ 'copy.json': { content: payload, contentType: 'application/json' } }).then(function () {
+      dirty = false; note('saved ✓ synced', true);
+    }, function (err) {
+      var code = err && err.code;
+      if (code === 'not_writer' || code === 'not_granted' || code === 'capability_disabled' || code === 'capability_removed' || code === 'not_declared') { artDead = true; note('saved on this device only', true); }
+      else if (code === 'rate_limited') { note('saved on this device · sync paused', true); clearTimeout(pubT); pubT = setTimeout(pushRemote, 15000); }
+      else if (code === 'conflict') { clearTimeout(pubT); pubT = setTimeout(pushRemote, 1500); }
+      else { note('saved on this device · sync failed', true); }
+    });
+  });
+}
+EDS.forEach(function (el) {
+  el.addEventListener('input', function () {
+    dirty = true;
+    try { localStorage.setItem(CKEY, JSON.stringify(collect())); } catch (e) {}
+    note('saved on this device', true);
+    clearTimeout(pubT); pubT = setTimeout(pushRemote, 2500);
+  });
+});
+document.getElementById('copyAll').onclick = function () {
+  var lines = EDS.map(function (el) { return (el.getAttribute('data-key') || '?') + ' — ' + el.textContent.replace(/\s+/g, ' ').trim(); });
+  var text = 'Joe\'s Practice Map — copy\n\n' + lines.join('\n');
+  function done() { note('copied'); }
+  if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(done, done); else done();
+};
+
+/* ---------- your notes + weekly note (per-viewer) ----------
+   Quick notes (+ button) keep the screen they were written on and stay until Joe removes them;
+   notes saved with strength sessions show in the same list. "Send to Tanner" sends the weekly
+   note plus whatever was added since the last send. */
+var NKEY = 'joe-map-note', QKEY = 'joe-map-quick', SKEY = 'joe-map-sent', LKEY = 'joe-map-lastsent';
+var ENDPOINT = 'https://formsubmit.co/ajax/e5140376f99018c5113aaaa81b550434'; /* same FormSubmit box as Max's dashboard → Tanner's inbox */
+var noteMain = document.getElementById('note-main'), nstatus = document.getElementById('nstatus');
+try { noteMain.value = localStorage.getItem(NKEY) || ''; } catch (e) {}
+noteMain.addEventListener('input', function () { try { localStorage.setItem(NKEY, noteMain.value); } catch (e) {} });
+var quick = [];
+try { quick = JSON.parse(localStorage.getItem(QKEY) || '[]') || []; } catch (e) { quick = []; }
+function saveQuick() { try { localStorage.setItem(QKEY, JSON.stringify(quick)); } catch (e) {} }
+function today() { return new Date().toISOString().slice(0, 10); }
+function lastSent() { try { return +localStorage.getItem(LKEY) || 0; } catch (e) { return 0; } }
+function fmtDate(ts) { return new Date(ts).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }); }
+function noteTs(n) { return n.ts || (n.d ? new Date(n.d + 'T12:00:00').getTime() : 0); }
+function screenLabel() {
+  var s = SCREENS.filter(function (k) { return document.getElementById('screen-' + k).hasAttribute('data-local-active'); })[0] || 'home';
+  if (s === 'home') return 'Home';
+  var t = document.querySelector('#screen-' + s + ' .stitle'); return t ? t.textContent.replace(/\s+/g, ' ').trim() : s;
+}
+function allNotes() {
+  var out = quick.map(function (n, i) { return { ts: noteTs(n), t: n.t, ctx: n.ctx || '', i: i }; });
+  if (typeof st !== 'undefined' && st && st.sessions) st.sessions.forEach(function (s) {
+    (s.entries || []).forEach(function (e) { if (e.note) out.push({ ts: s.endedAt, t: e.note, ctx: 'Strength · ' + e.name, ro: true }); });
+    if (s.note && s.note.indexOf('(auto-saved') !== 0) out.push({ ts: s.endedAt, t: s.note, ctx: 'Strength', ro: true });
+  });
+  out.sort(function (a, b) { return b.ts - a.ts; });
+  return out;
+}
+var notesShowEarlier = false;
+function noteItem(n, sharedFlag) {
+  var li = document.createElement('li');
+  var head = document.createElement('div'); head.className = 'qhead';
+  var d = document.createElement('span'); d.className = 'd'; d.textContent = fmtDate(n.ts) + (sharedFlag ? ' · shared' : '');
+  head.appendChild(d);
+  if (n.ctx) { var c = document.createElement('span'); c.className = 'qctx'; c.textContent = n.ctx; head.appendChild(c); }
+  var t = document.createElement('div'); t.className = 'qt'; t.textContent = n.t;
+  li.appendChild(head); li.appendChild(t);
+  if (!n.ro) { var x = document.createElement('button'); x.type = 'button'; x.className = 'qx'; x.title = 'Remove'; x.setAttribute('aria-label', 'Remove note'); x.textContent = '×'; x.onclick = function () { quick.splice(n.i, 1); saveQuick(); renderNotes(); }; li.appendChild(x); }
+  return li;
+}
+/* new since the last share on top; everything already shared folds behind "Show earlier" */
+function renderNotes() {
+  var ul = document.getElementById('qlist'), more = document.getElementById('qmore'); if (!ul) return;
+  var notes = allNotes(), shared = lastSent();
+  var fresh = notes.filter(function (n) { return n.ts > shared; }), earlier = notes.filter(function (n) { return n.ts <= shared; });
+  var empty = document.getElementById('qempty'); if (empty) empty.hidden = notes.length > 0;
+  var none = document.getElementById('qnone'); if (none) none.hidden = !(fresh.length === 0 && earlier.length > 0);
+  ul.innerHTML = ''; fresh.forEach(function (n) { ul.appendChild(noteItem(n, false)); });
+  if (more) {
+    more.innerHTML = '';
+    if (earlier.length) {
+      var tg = document.createElement('button'); tg.type = 'button'; tg.className = 'reset qtoggle';
+      tg.textContent = (notesShowEarlier ? 'Hide earlier' : 'Show earlier') + ' (' + earlier.length + ')';
+      tg.onclick = function () { notesShowEarlier = !notesShowEarlier; renderNotes(); };
+      more.appendChild(tg);
+      if (notesShowEarlier) { var ul2 = document.createElement('ul'); ul2.className = 'qlist'; earlier.forEach(function (n) { ul2.appendChild(noteItem(n, true)); }); more.appendChild(ul2); }
+    }
+  }
+  var ca = document.getElementById('copyall'); if (ca) ca.hidden = notes.length === 0;
+}
+function renderQuick() { renderNotes(); }
+renderNotes();
+var fab = document.getElementById('fab'), sheet = document.getElementById('sheet'), ta = document.getElementById('sheet-text'), sheetLbl = document.getElementById('sheet-lbl'), sheetCtx = '';
+function openSheet(on) {
+  sheet.hidden = !on; fab.setAttribute('aria-expanded', on ? 'true' : 'false');
+  if (on) { sheetCtx = screenLabel(); if (sheetLbl) sheetLbl.textContent = 'Quick note · ' + sheetCtx; ta.focus(); }
+}
+fab.onclick = function () { openSheet(sheet.hidden); };
+document.getElementById('sheet-cancel').onclick = function () { ta.value = ''; openSheet(false); };
+document.getElementById('sheet-save').onclick = function () {
+  var t = ta.value.trim(); if (!t) { openSheet(false); return; }
+  quick.push({ d: today(), ts: Date.now(), t: t, ctx: sheetCtx }); saveQuick(); renderNotes(); ta.value = ''; openSheet(false);
+};
+function compile(all) {
+  var parts = [];
+  var m = noteMain.value.trim(); if (m && !all) parts.push(m);
+  var since = all ? -1 : lastSent(); var list = allNotes().filter(function (n) { return n.ts > since; }).reverse();
+  if (list.length) parts.push(list.map(function (n) { return fmtDate(n.ts) + (n.ctx ? ' · ' + n.ctx : '') + ' — ' + n.t; }).join('\n'));
+  return parts.join('\n\n');
+}
+function loadSent() { try { return JSON.parse(localStorage.getItem(SKEY) || '[]'); } catch (e) { return []; } }
+function renderHist() {
+  var h = document.getElementById('nhist'); var sent = loadSent().slice(-3).reverse();
+  h.innerHTML = sent.map(function (n) {
+    var d = new Date(n.t).toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+    return '<div class="nh-item"><div class="nh-date">' + (n.how === 'copied' ? 'Copied ' + d : 'Sent ' + d + ' ✓') + '</div><p class="nh-text"></p></div>';
+  }).join('');
+  var ps = h.querySelectorAll('.nh-text'); sent.forEach(function (n, i) { ps[i].textContent = n.note; });
+}
+renderHist();
+/* sending or copying both count as shared: the box clears, the notes stay and fold into "earlier" */
+function afterShare(text, how) {
+  var sent = loadSent(); sent.push({ t: Date.now(), note: text, how: how });
+  try { localStorage.setItem(SKEY, JSON.stringify(sent)); localStorage.setItem(LKEY, String(Date.now())); localStorage.setItem(NKEY, ''); } catch (e) {}
+  noteMain.value = '';
+  renderNotes(); renderHist();
+}
+function afterSend(text) { afterShare(text, 'sent'); }
+function mailtoFallback(text) {
+  window.location.href = 'mailto:tannerholman97@gmail.com?subject=' + encodeURIComponent('Weekly note — Joe — ' + today()) + '&body=' + encodeURIComponent(text);
+}
+document.getElementById('send').onclick = function () {
+  var text = compile(); var btn = this;
+  if (!text) { nstatus.className = 'nstatus'; nstatus.textContent = 'Write a note first — even one line is plenty.'; return; }
+  btn.disabled = true; nstatus.className = 'nstatus'; nstatus.textContent = 'Sending…';
+  fetch(ENDPOINT, {
+    method: 'POST', headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+    body: JSON.stringify({ _subject: 'Joe practice map — weekly note ' + today(), client: 'Joe Gherity', note: text })
+  }).then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+    .then(function () { afterSend(text); nstatus.textContent = 'Sent to Tanner ✓'; btn.disabled = false; })
+    .catch(function () { nstatus.textContent = 'Opening your mail app instead…'; btn.disabled = false; mailtoFallback(text); });
+};
+document.getElementById('copy').onclick = function () {
+  var text = compile(); if (!text) { nstatus.className = 'nstatus'; nstatus.textContent = 'Nothing new to copy.'; return; }
+  function done() { afterShare(text, 'copied'); nstatus.className = 'nstatus'; nstatus.textContent = 'Copied — paste it into a text to Tanner. Marked as shared.'; }
+  if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(done, done); else done();
+};
+document.getElementById('copyall').onclick = function () {
+  var text = compile(true); if (!text) { nstatus.textContent = 'No notes yet.'; return; }
+  function done() { nstatus.className = 'nstatus'; nstatus.textContent = 'Copied all notes.'; }
+  if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(done, done); else done();
+};
+function clearNote() { noteMain.value = ''; try { localStorage.setItem(NKEY, ''); } catch (e) {} nstatus.textContent = 'Cleared.'; }
+/* ---------- strength (port of Strength Rebuild v2.12's day screen; per-viewer) ----------
+   Counting rings bank one set per tap and start the rest (the tap that fills the ring is
+   the check; tapping the check resets, no timer); warm-up and the floor game get the plain
+   one-tap ring. The rest strip is sticky and present only while a rest runs — silent,
+   vibration where the phone supports it, "Rest done — go" for 4 s, then gone. Finish shows
+   a "Will save" recap, records every movement's sets + notes, and a session left open
+   >12 h auto-saves on the next open. State: localStorage joe-map-strength-v2. */
+var ST_KEY = 'joe-map-strength-v2', ST_STALE = 12 * 3600 * 1000, ST_VERSION = '2.0';
+var st = null;
+function stDefault() { return { v: 2, rest: 30, active: null, sessions: [] }; }
+function stValid(o) { return !!(o && o.v === 2 && Array.isArray(o.sessions)); }
+try { st = JSON.parse(localStorage.getItem(ST_KEY) || 'null'); } catch (e) { st = null; }
+if (!stValid(st)) st = stDefault();
+if (!(st.rest > 0)) st.rest = 30;
+function stSave() { try { localStorage.setItem(ST_KEY, JSON.stringify(st)); } catch (e) {} }
+function stMMSS(sec) { sec = Math.max(0, Math.round(sec)); return Math.floor(sec / 60) + ':' + String(sec % 60).padStart(2, '0'); }
+function stDate(ts) { return new Date(ts).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }); }
+var ST_SLOTS = Array.prototype.slice.call(document.querySelectorAll('#screen-strength .slot[data-mv]'));
+function stSlot(id) { return document.querySelector('#screen-strength .slot[data-mv="' + id + '"]'); }
+function stTarget(el) { return parseInt(el.getAttribute('data-sets') || '0', 10) || 0; }
+function stText(el, sel) { var n = el.querySelector(sel); return n ? n.textContent.replace(/\s+/g, ' ').trim() : ''; }
+
+/* active session — begins lazily on the first ring tap or note */
+function stTouch() { var a = st.active; if (!a) a = st.active = { startedAt: Date.now(), lastActivityAt: Date.now(), entries: {} }; a.lastActivityAt = Date.now(); return a; }
+function stEntry(id) { var a = stTouch(); if (!a.entries[id]) a.entries[id] = { note: '' }; return a.entries[id]; }
+function stGet(id) { return (st.active && st.active.entries[id]) || null; }
+
+/* rings, set lines, mats, trail */
+var ST_CIRC = 2 * Math.PI * 10.5;
+function stPaintSlot(el) {
+  var id = el.getAttribute('data-mv'), e = stGet(id), total = stTarget(el), done = !!(e && e.done);
+  el.classList.toggle('done', done);
+  var ring = el.querySelector('.ring');
+  if (ring) {
+    if (!total) { ring.className = 'ring' + (done ? ' on' : ''); ring.innerHTML = ''; ring.setAttribute('aria-label', done ? 'Done — tap to reopen' : 'Mark done'); }
+    else {
+      var n = done ? total : Math.min((e && e.sets) || 0, total - 1);
+      var off = ST_CIRC * (1 - n / total);
+      ring.className = 'ring counting' + (done ? ' on' : '');
+      ring.setAttribute('aria-label', done ? 'Reset sets' : 'Count one set');
+      ring.innerHTML = '<svg viewBox="0 0 25 25" aria-hidden="true"><circle class="ring-track" cx="12.5" cy="12.5" r="10.5"></circle><circle class="ring-arc" cx="12.5" cy="12.5" r="10.5" style="stroke-dasharray:' + ST_CIRC.toFixed(2) + ';stroke-dashoffset:' + off.toFixed(2) + '"></circle></svg><span class="ring-count">' + (done ? '✓' : (n || '')) + '</span>';
+      var line = el.querySelector('[data-setline]');
+      if (line) { line.textContent = 'Set ' + n + ' of ' + total + ' down'; line.classList.toggle('hidden', !n); }
+    }
+  }
+  var nb = el.querySelector('.notebtn'); if (nb) nb.classList.toggle('has-note', !!(e && e.note && e.note.trim()));
+  var ta = el.querySelector('textarea[data-action="notetext"]'); if (ta && document.activeElement !== ta) ta.value = e && e.note ? e.note : '';
+}
+function stPaintMats() {
+  document.querySelectorAll('#screen-strength .pairmat').forEach(function (m) {
+    var cards = Array.prototype.slice.call(m.querySelectorAll('.slot'));
+    m.classList.toggle('done', cards.length > 0 && cards.every(function (c) { return c.classList.contains('done'); }));
+  });
+  document.querySelectorAll('[data-pairrest]').forEach(function (el) { el.textContent = stMMSS(st.rest); });
+}
+function stDoneCount() { return ST_SLOTS.filter(function (el) { var e = stGet(el.getAttribute('data-mv')); return !!(e && e.done); }).length; }
+function stTrail() {
+  var t = document.getElementById('st-trail'); if (!t) return;
+  var done = 0;
+  t.innerHTML = ST_SLOTS.map(function (el) { var e = stGet(el.getAttribute('data-mv')); var on = !!(e && e.done); if (on) done++; return '<span class="trail-pip' + (on ? ' on' : '') + '"></span>'; }).join('') +
+    '<span class="trail-count">' + done + ' of ' + ST_SLOTS.length + '</span>';
+}
+function stRender() {
+  ST_SLOTS.forEach(stPaintSlot); stPaintMats(); stTrail();
+  document.querySelectorAll('#st-restseg button').forEach(function (b) { b.classList.toggle('on', +b.getAttribute('data-rest') === st.rest); });
+  stRenderHist();
+  var ver = document.getElementById('st-version');
+  if (ver) ver.textContent = 'v' + ST_VERSION + ' · ' + st.sessions.length + ' session' + (st.sessions.length === 1 ? '' : 's') + ' logged · saved on this device';
+  var tl = document.getElementById('st-tlast');
+  if (tl) { var last = st.sessions[st.sessions.length - 1]; tl.textContent = last ? 'Last: ' + stDate(last.endedAt) : 'No sessions yet'; }
+  if (typeof renderNotes === 'function') renderNotes();
+}
+
+/* rest — silent; the strip exists only while running or just done */
+var ST_NUM = ['zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten', 'eleven', 'twelve'];
+function stRestLabelFor(n, total) {
+  if (n >= total) return 'All ' + (ST_NUM[total] || total) + ' in — take the full rest';
+  if (n === total - 1) return 'One left — finish crisp';
+  if (n === 1) return 'One in — shake it out';
+  if (n * 2 === total) return 'Halfway — breathe easy';
+  var w = String(ST_NUM[n] || n);
+  return w.charAt(0).toUpperCase() + w.slice(1) + ' down, ' + (ST_NUM[total - n] || total - n) + ' to go — breathe easy';
+}
+var stRest = { running: false, endsAt: 0, total: 0, label: null, done: false, tick: null, doneT: null };
+var stLock = null;
+function stWake(on) {
+  try {
+    if (on) { if ('wakeLock' in navigator && !stLock) navigator.wakeLock.request('screen').then(function (l) { stLock = l; l.addEventListener('release', function () { stLock = null; }); }, function () { stLock = null; }); }
+    else if (stLock) { stLock.release(); stLock = null; }
+  } catch (e) { stLock = null; }
+}
+function stDockHTML() {
+  if (stRest.running) {
+    var left = (stRest.endsAt - Date.now()) / 1000;
+    var pct = Math.max(0, Math.min(100, (1 - left / stRest.total) * 100));
+    return '<div class="rest-running"><div class="rest-fill" data-rest-fill style="width:' + pct + '%"></div><div class="rest-row"><div class="rest-time" data-rest-time>' + stMMSS(left) + '</div><span class="rest-label" data-rest-label></span><button class="rest-mini" type="button" data-action="rest-restart" aria-label="Restart rest">↻</button><button class="rest-mini" type="button" data-action="rest-cancel" aria-label="Cancel rest">✕</button></div></div>';
+  }
+  if (stRest.done) return '<button class="rest-done" type="button" data-action="rest-ack">Rest done — go</button>';
+  return '';
+}
+function stRenderDock() {
+  var dock = document.getElementById('st-dock'); if (!dock) return;
+  var html = stDockHTML();
+  dock.innerHTML = html; dock.hidden = !html;
+  var lbl = dock.querySelector('[data-rest-label]'); if (lbl) lbl.textContent = stRest.label || 'Resting';
+}
+function stUpdateTime(left) {
+  var t = document.querySelector('[data-rest-time]'), f = document.querySelector('[data-rest-fill]');
+  if (t) t.textContent = stMMSS(left);
+  if (f) f.style.width = Math.max(0, Math.min(100, (1 - left / stRest.total) * 100)) + '%';
+}
+function stStopTick() { clearInterval(stRest.tick); stRest.tick = null; clearTimeout(stRest.doneT); stRest.doneT = null; }
+function stRestStart(label) {
+  stStopTick();
+  stRest.running = true; stRest.done = false; stRest.label = label || null; stRest.total = st.rest; stRest.endsAt = Date.now() + st.rest * 1000;
+  stWake(true); stRenderDock();
+  stRest.tick = setInterval(function () { if (!stRest.running) return; var left = (stRest.endsAt - Date.now()) / 1000; if (left <= 0) stRestFinish(); else stUpdateTime(left); }, 250);
+}
+function stRestCancel() { stStopTick(); stRest.running = false; stRest.done = false; stWake(false); stRenderDock(); }
+function stRestFinish() {
+  stStopTick(); stRest.running = false; stRest.done = true; stWake(false);
+  try { if (navigator.vibrate) navigator.vibrate([220, 120, 220, 120, 320]); } catch (e) {}
+  stRenderDock();
+  stRest.doneT = setTimeout(function () { if (stRest.done && !stRest.running) { stRest.done = false; stRenderDock(); } }, 4000);
+}
+
+/* taps + typing inside the strength screen */
+document.getElementById('screen-strength').addEventListener('click', function (ev) {
+  var t = ev.target.closest('[data-action]'); if (!t) return;
+  var action = t.getAttribute('data-action');
+  if (action === 'rest-restart') { stRestStart(stRest.label); return; }
+  if (action === 'rest-cancel') { stRestCancel(); return; }
+  if (action === 'rest-ack') { stRest.done = false; stStopTick(); stRenderDock(); return; }
+  var slot = t.closest('.slot'); var id = slot && slot.getAttribute('data-mv'); if (!id) return;
+  if (action === 'ring') {
+    var e = stEntry(id), total = stTarget(slot);
+    if (total) {
+      if (e.done) { delete e.done; delete e.sets; }
+      else { e.sets = Math.min((e.sets || 0) + 1, total); if (e.sets >= total) e.done = true; stRestStart(stRestLabelFor(e.sets, total)); }
+    } else if (e.done) { delete e.done; } else { e.done = true; }
+    stSave(); stPaintSlot(slot); stPaintMats(); stTrail();
+    return;
+  }
+  if (action === 'note') { var box = slot.querySelector('.note-edit'); box.hidden = !box.hidden; if (!box.hidden) box.querySelector('textarea').focus(); }
+});
+document.getElementById('screen-strength').addEventListener('input', function (ev) {
+  var t = ev.target; if (t.getAttribute('data-action') !== 'notetext') return;
+  var slot = t.closest('.slot'); var id = slot && slot.getAttribute('data-mv'); if (!id) return;
+  stEntry(id).note = t.value; stSave();
+  var nb = slot.querySelector('.notebtn'); if (nb) nb.classList.toggle('has-note', !!t.value.trim());
+});
+document.addEventListener('visibilitychange', function () { if (!document.hidden) { stAutoFinish(); if (stRest.running && Date.now() >= stRest.endsAt) stRestFinish(); } });
+
+/* finish — recap, then record every movement's sets + notes */
+function stRecord(noteText) {
+  var a = st.active, entries = [];
+  ST_SLOTS.forEach(function (el) {
+    var id = el.getAttribute('data-mv'), e = a && a.entries[id], total = stTarget(el);
+    var sets = e && e.sets ? Math.min(e.sets, total || e.sets) : (e && e.done && total ? total : 0);
+    var note = e && e.note && e.note.trim() ? e.note.trim() : '';
+    if (total || note || (e && e.done)) {
+      var ent = { id: id, name: stText(el, '.slot-name'), cue: stText(el, '.slot-cue') };
+      if (total) ent.sets = sets; else if (e && e.done) ent.done = true;
+      if (note) ent.note = note;
+      entries.push(ent);
+    }
+  });
+  var now = Date.now();
+  st.sessions.push({ id: now.toString(36), startedAt: a ? a.startedAt : now, endedAt: now, mins: a ? Math.max(1, Math.round((now - a.startedAt) / 60000)) : 0, note: (noteText || '').trim(), entries: entries });
+  st.active = null; stSave();
+}
+function stAutoFinish() {
+  var a = st.active; if (!a) return;
+  if (Date.now() - (a.lastActivityAt || a.startedAt) > ST_STALE) { stRecord('(auto-saved — session left open)'); stRender(); }
+}
+var stPanel = document.getElementById('st-panel'), stStatus = document.getElementById('st-status'), stSessNote = document.getElementById('st-sessnote');
+function stFlash(el, msg) { el.textContent = msg; clearTimeout(el._t); el._t = setTimeout(function () { el.textContent = ''; }, 2600); }
+function stRecap() {
+  var a = st.active, doneCt = stDoneCount();
+  var mins = a ? Math.max(1, Math.round((Date.now() - a.startedAt) / 60000)) : 0;
+  document.getElementById('st-finishline').textContent = 'Strength' + (doneCt ? ' · ' + doneCt + ' of ' + ST_SLOTS.length : '') + (mins ? ' · ' + mins + ' min' : '');
+  var rows = [], extras = [];
+  ST_SLOTS.forEach(function (el) {
+    var id = el.getAttribute('data-mv'), e = a && a.entries[id], total = stTarget(el), noted = !!(e && e.note && e.note.trim());
+    var name = stText(el, '.slot-name');
+    if (total) {
+      var n = e && e.done ? total : Math.min((e && e.sets) || 0, total);
+      rows.push('<div class="rrow"><span class="rrow-name">' + name + (noted ? '<i class="rrow-note">✎</i>' : '') + '</span><span class="rrow-num">' + (n ? n + ' of ' + total + ' sets' : '—') + '</span></div>');
+    } else if (noted || (e && e.done)) extras.push(name + (e && e.done ? ' ✓' : '') + (noted ? ' ✎' : ''));
+  });
+  document.getElementById('st-recap').innerHTML = rows.join('') + (extras.length ? '<div class="recap-extra"></div>' : '');
+  var ex = document.querySelector('#st-recap .recap-extra'); if (ex) ex.textContent = extras.join(' · ');
+}
+document.getElementById('st-finish').onclick = function () { if (stPanel.hidden) { stRecap(); stPanel.hidden = false; stSessNote.focus(); } else stPanel.hidden = true; };
+document.getElementById('st-notyet').onclick = function () { stPanel.hidden = true; };
+document.getElementById('st-save').onclick = function () {
+  var a = st.active;
+  var any = !!(a && Object.keys(a.entries).some(function (k) { var e = a.entries[k]; return e.done || e.sets || (e.note && e.note.trim()); }));
+  if (!any && !stSessNote.value.trim()) { stFlash(stStatus, 'Nothing to save yet — tap a ring or leave a note.'); return; }
+  stRecord(stSessNote.value); stSessNote.value = ''; stPanel.hidden = true; stRestCancel(); stRender();
+  document.querySelectorAll('#screen-strength .note-edit').forEach(function (b) { b.hidden = true; });
+  stFlash(stStatus, 'Saved ✓');
+};
+
+/* past sessions */
+var stHistAll = false;
+function stRenderHist() {
+  var h = document.getElementById('st-hist'), empty = document.getElementById('st-empty'); if (!h) return;
+  var all = st.sessions.slice().reverse(); var show = stHistAll ? all : all.slice(0, 5);
+  if (empty) empty.hidden = all.length > 0;
+  h.innerHTML = '';
+  show.forEach(function (s) {
+    var d = document.createElement('div'); d.className = 'hist';
+    var dt = document.createElement('span'); dt.className = 'd'; dt.textContent = stDate(s.endedAt);
+    var total = 0, notes = [];
+    (s.entries || []).forEach(function (e) { total += e.sets || 0; if (e.note) notes.push(e.name + ': ' + e.note); });
+    var sm = document.createElement('span'); sm.className = 's';
+    sm.textContent = total + ' set' + (total === 1 ? '' : 's') + (s.mins ? ' · ' + s.mins + ' min' : '') + (notes.length ? ' — ' + notes.join(' · ') : '');
+    d.appendChild(dt); d.appendChild(sm);
+    if (s.note) { var n = document.createElement('span'); n.className = 's'; var i = document.createElement('i'); i.textContent = s.note; n.appendChild(i); d.appendChild(n); }
+    h.appendChild(d);
+  });
+  if (all.length > 5 && !stHistAll) { var m = document.createElement('button'); m.className = 'ghost'; m.type = 'button'; m.style.marginTop = '10px'; m.textContent = 'Show all ' + all.length; m.onclick = function () { stHistAll = true; stRenderHist(); }; h.appendChild(m); }
+}
+
+/* settings + data */
+var stD = document.getElementById('st-dstatus');
+document.getElementById('st-restseg').addEventListener('click', function (ev) { var b = ev.target.closest('button[data-rest]'); if (!b) return; st.rest = +b.getAttribute('data-rest'); stSave(); stRender(); });
+document.getElementById('st-copy').onclick = function () {
+  var text = JSON.stringify({ app: 'joe-practice-map', part: 'strength', exportedAt: new Date().toISOString(), data: st }, null, 1);
+  function ok() { stFlash(stD, 'Copied'); } function no() { stFlash(stD, 'Copy failed'); }
+  if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(ok, no); else no();
+};
+var stImportBox = document.getElementById('st-importbox'), stImportText = document.getElementById('st-importtext');
+document.getElementById('st-import').onclick = function () { stImportBox.hidden = !stImportBox.hidden; if (!stImportBox.hidden) stImportText.focus(); };
+document.getElementById('st-import-cancel').onclick = function () { stImportBox.hidden = true; };
+document.getElementById('st-import-load').onclick = function () {
+  try {
+    var p = JSON.parse(stImportText.value || ''); var d = p && p.data && stValid(p.data) ? p.data : (stValid(p) ? p : null);
+    if (!d) { stFlash(stD, 'Not a Practice Map strength export'); return; }
+    st = d; if (!(st.rest > 0)) st.rest = 30; stSave(); stRestCancel(); stRender(); stImportBox.hidden = true; stImportText.value = ''; stFlash(stD, 'Imported');
+  } catch (e) { stFlash(stD, 'Could not read that'); }
+};
+var stEraseArmed = false;
+document.getElementById('st-erase').onclick = function () {
+  var b = this;
+  if (!stEraseArmed) { stEraseArmed = true; b.textContent = 'Tap again to erase'; setTimeout(function () { stEraseArmed = false; b.textContent = 'Erase'; }, 3500); return; }
+  stEraseArmed = false; b.textContent = 'Erase'; st = stDefault(); stSave(); stRestCancel(); stRender(); stFlash(stD, 'Erased');
+};
+window.addEventListener('pageshow', function (e) { if (e.persisted) stAutoFinish(); });
+stAutoFinish(); stRender();
+</script>
