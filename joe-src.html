@@ -117,8 +117,16 @@ footer { max-width: var(--col); margin: 0 auto; padding: 0 16px calc(24px + env(
 
 /* ---- 7. pain ---- */
 .paud { display: grid; grid-template-columns: 44px minmax(0, 1fr); column-gap: 12px; align-items: start; }
-.paud .play { width: 44px; height: 44px; border-radius: 50%; background: var(--accent); display: grid; place-items: center; }
+.paud .play { width: 44px; height: 44px; border: 0; padding: 0; border-radius: 50%; background: var(--accent); display: grid; place-items: center; cursor: pointer; transition: background .15s ease; }
 .paud .play svg { fill: var(--ink); margin-left: 2px; }
+.paud .play .ic-pause { display: none; margin-left: 0; }
+.paud .play.is-playing .ic-play { display: none; }
+.paud .play.is-playing .ic-pause { display: block; }
+.paud audio { display: none; }
+.prog { position: relative; height: 4px; border-radius: 2px; background: var(--rule); margin-top: 10px; cursor: pointer; touch-action: none; }
+.prog::before { content: ''; position: absolute; left: 0; right: 0; top: -14px; bottom: -14px; }
+.prog-fill { height: 100%; width: 0; border-radius: 2px; background: var(--accent); }
+.times { display: flex; justify-content: space-between; margin-top: 5px; font: 600 12px/1.3 var(--sans); color: var(--muted); font-variant-numeric: tabular-nums; }
 .paud .lbody { display: flex; flex-direction: column; gap: 4px; }
 .paud .meta { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
 .exname { font: 600 17px/1.3 var(--serif); color: var(--text); text-wrap: balance; }
@@ -126,9 +134,7 @@ footer { max-width: var(--col); margin: 0 auto; padding: 0 16px calc(24px + env(
 .exbody { font: 15px/1.4 var(--sans); color: var(--soft); }
 .fn { display: block; font: 13px/1.4 var(--sans); color: var(--muted); }
 .fn .fk { font-weight: 600; color: var(--text); margin-right: .35em; }
-.paud .scrub { margin-top: 6px; height: 3px; border-radius: 2px; background: var(--rule); }
-.paud .player { width: 100%; height: 40px; margin-top: 8px; display: block; }
-.paud .credit { margin-top: 2px; }
+.paud .credit { margin-top: 4px; }
 .chip { display: inline-block; font: 600 12px/1.3 var(--sans); color: var(--muted); background: var(--raised); border-radius: 999px; padding: 3px 10px; }
 .psec { margin: 18px 0 8px; }
 .moves { padding: 2px 16px; }
@@ -325,13 +331,15 @@ textarea.nbox { width: 100%; min-height: 7.5rem; resize: vertical; font: 17px/1.
   <p class="sintro ed" data-key="pain.intro">This week is about getting familiar. No need to fix anything: just meeting the feelings around pain with curiosity and kindness.</p>
 
   <div class="card paud">
-    <span class="play" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 24 24"><path d="M7 4.5v15l12-7.5z"></path></svg></span>
+    <button class="play" id="pain-play" type="button" aria-label="Play"><svg class="ic-play" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4.5v15l12-7.5z"></path></svg><svg class="ic-pause" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 4.5h4.5v15H6zM13.5 4.5H18v15h-4.5z"></path></svg></button>
     <div class="lbody">
       <div class="meta"><div class="exname ed" data-key="pain.full.name">Emotional inquiry</div><span class="dur ed" data-key="pain.full.dur">11 min</span></div>
       <div class="exbody ed" data-key="pain.full.what"></div>
       <span class="fn"><span class="fk ed" data-key="pain.full.before.k">Before you begin</span><span class="ed" data-key="pain.full.before"></span></span>
       <span class="fn"><span class="fk ed" data-key="pain.full.fk">After</span><span class="ed" data-key="pain.full.fn"></span></span>
-      <audio class="player" id="pain-audio" controls preload="none" src="audio/emotional-inquiry.mp3"></audio>
+      <audio id="pain-audio" preload="metadata" src="audio/emotional-inquiry.mp3"></audio>
+      <div class="prog" id="pain-prog" role="slider" aria-label="Position" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" tabindex="0"><div class="prog-fill" id="pain-fill"></div></div>
+      <div class="times"><span id="pain-cur">0:00</span><span id="pain-rem"></span></div>
       <span class="fn credit ed" data-key="pain.full.credit">Joe Hudson · Art of Accomplishment</span>
     </div>
   </div>
@@ -552,8 +560,43 @@ function go(name, force) {
   document.querySelectorAll('#edn button[data-go]').forEach(function (b) { b.classList.toggle('on', b.getAttribute('data-go') === name); });
   window.scrollTo(0, 0);
 }
-/* hero tap: open the pain screen and, where a player exists, start it in the same gesture */
-function playPain() { var a = document.getElementById('pain-audio'); if (a && a.paused) { try { var p = a.play(); if (p && p.catch) p.catch(function () {}); } catch (e) {} } }
+/* ---------- practice player (one control: the round button; native controls hidden) ---------- */
+var painA = document.getElementById('pain-audio');
+function playPain() { if (painA && painA.paused) { try { var p = painA.play(); if (p && p.catch) p.catch(function () {}); } catch (e) {} } }
+(function () {
+  var b = document.getElementById('pain-play'), prog = document.getElementById('pain-prog'), fill = document.getElementById('pain-fill'), cur = document.getElementById('pain-cur'), rem = document.getElementById('pain-rem');
+  if (!painA || !b) return;
+  function mmss(s) { s = Math.max(0, Math.round(s || 0)); return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0'); }
+  function paint() {
+    var d = painA.duration || 0, t = painA.currentTime || 0, pct = d ? (t / d) * 100 : 0;
+    fill.style.width = pct + '%'; prog.setAttribute('aria-valuenow', String(Math.round(pct)));
+    cur.textContent = mmss(t); rem.textContent = d ? '−' + mmss(d - t) : '';
+    var playing = !painA.paused && !painA.ended;
+    b.classList.toggle('is-playing', playing); b.setAttribute('aria-label', playing ? 'Pause' : 'Play');
+  }
+  b.onclick = function () { if (painA.paused) playPain(); else painA.pause(); };
+  ['timeupdate', 'play', 'pause', 'loadedmetadata', 'durationchange', 'seeked'].forEach(function (ev) { painA.addEventListener(ev, paint); });
+  painA.addEventListener('ended', function () { painA.currentTime = 0; paint(); });
+  function seekTo(x) { var r = prog.getBoundingClientRect(); var f = Math.max(0, Math.min(1, (x - r.left) / r.width)); if (painA.duration) { painA.currentTime = f * painA.duration; paint(); } }
+  var drag = false;
+  prog.addEventListener('pointerdown', function (e) { drag = true; try { prog.setPointerCapture(e.pointerId); } catch (err) {} seekTo(e.clientX); });
+  prog.addEventListener('pointermove', function (e) { if (drag) seekTo(e.clientX); });
+  prog.addEventListener('pointerup', function () { drag = false; });
+  prog.addEventListener('pointercancel', function () { drag = false; });
+  prog.addEventListener('keydown', function (e) { if (!painA.duration) return; if (e.key === 'ArrowRight') { painA.currentTime = Math.min(painA.duration, painA.currentTime + 15); paint(); } if (e.key === 'ArrowLeft') { painA.currentTime = Math.max(0, painA.currentTime - 15); paint(); } });
+  /* lock-screen / earbud controls */
+  if ('mediaSession' in navigator && window.MediaMetadata) {
+    function txt(k, d) { var el = document.querySelector('[data-key="' + k + '"]'); return el && el.textContent.trim() ? el.textContent.trim() : d; }
+    try {
+      navigator.mediaSession.metadata = new MediaMetadata({ title: txt('pain.full.name', 'Emotional inquiry'), artist: txt('pain.full.credit', ''), album: txt('title', "Joe's Practice Map"), artwork: [{ src: 'icon-512.png', sizes: '512x512', type: 'image/png' }] });
+      navigator.mediaSession.setActionHandler('play', playPain);
+      navigator.mediaSession.setActionHandler('pause', function () { painA.pause(); });
+      navigator.mediaSession.setActionHandler('seekbackward', function () { painA.currentTime = Math.max(0, painA.currentTime - 15); });
+      navigator.mediaSession.setActionHandler('seekforward', function () { painA.currentTime = Math.min(painA.duration || 0, painA.currentTime + 15); });
+    } catch (e) {}
+  }
+  paint();
+})();
 document.getElementById('edn').addEventListener('click', function (ev) { var b = ev.target.closest('button[data-go]'); if (b) go(b.getAttribute('data-go'), true); });
 
 /* ---------- copy editing (Tanner: open with #edit) ----------
