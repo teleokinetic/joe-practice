@@ -168,6 +168,7 @@ body[data-local-edit] .restdock { top: 52px; }
 .slot-target { grid-column: 3; grid-row: 1; padding-top: 3px; font: 600 13px/1.4 var(--sans); color: var(--muted); text-align: right; max-width: 8rem; font-variant-numeric: tabular-nums; }
 .slot-cue { grid-column: 2 / 4; display: block; font: 15px/1.4 var(--sans); color: var(--text); }
 .slot-sub { grid-column: 2 / 4; display: block; font: 15px/1.4 var(--sans); color: var(--muted); }
+.demolink { grid-column: 2 / 4; justify-self: start; display: inline-flex; align-items: center; gap: 4px; margin-top: 2px; font: 600 14px/1.4 var(--sans); color: var(--accent); text-decoration: none; }
 .setline { grid-column: 2; align-self: center; font: 600 13px/1.4 var(--sans); color: var(--accent); font-variant-numeric: tabular-nums; }
 .setline.hidden { display: none; }
 .slot-foot { grid-column: 3; justify-self: end; align-self: center; display: flex; align-items: center; gap: 10px; margin: -2px 0 -4px; }
@@ -194,7 +195,7 @@ body[data-local-edit] .restdock { top: 52px; }
 .ring.counting.on .ring-count { color: var(--ink); font-weight: 700; }
 .slot.done { padding-top: 10px; padding-bottom: 10px; }
 .slot.done .slot-name, .slot.done .slot-target { opacity: .45; }
-.slot.done .slot-cue, .slot.done .slot-sub, .slot.done .slot-foot, .slot.done .note-edit, .slot.done .setline { display: none; }
+.slot.done .slot-cue, .slot.done .slot-sub, .slot.done .demolink, .slot.done .slot-foot, .slot.done .note-edit, .slot.done .setline { display: none; }
 .finishbtn { width: 100%; margin-top: 14px; border: 1px solid var(--rule-strong); background: var(--card); color: var(--accent); border-radius: 999px; min-height: 48px; padding: 12px; font: 700 16px/1.2 var(--sans); cursor: pointer; }
 .finish-wrap { display: flex; flex-direction: column; gap: 10px; margin-top: 12px; }
 .finish-line { font: 400 20px/1.3 var(--display); color: var(--head); }
@@ -252,6 +253,7 @@ textarea.nbox { width: 100%; min-height: 7.5rem; resize: vertical; font: 17px/1.
   .tile:hover, .lrow:hover { border-color: var(--rule-strong); }
   .send:hover, .hero:hover .cta { background: var(--accent-hover); }
   .ghost:hover, .finishbtn:hover, #editbar button:hover { border-color: var(--accent); }
+  .demolink:hover { color: var(--accent-hover); }
   #fab:hover, .pillbtn:hover { background: rgba(58,90,128,.16); }
 }
 .tile:active, .lrow:active { border-color: var(--rule-strong); background: var(--bg); }
@@ -393,6 +395,7 @@ textarea.nbox { width: 100%; min-height: 7.5rem; resize: vertical; font: 17px/1.
   <div class="slot" data-mv="stork" data-sets="2">
     <div class="slot-head"><artifact-local><button class="ring" type="button" data-action="ring" aria-label="Mark done"></button></artifact-local><span class="slot-name ed" data-key="st.stork.name">Stork squat</span><span class="slot-target ed" data-key="st.stork.target">2×8–12 /side</span></div>
     <span class="slot-cue ed" data-key="st.stork.cue">Pelvis level, knee tracking over the foot</span>
+    <a class="demolink" href="https://youtu.be/f4uz9jq5xnE" target="_blank" rel="noopener">Watch the form demo · 1:00 ↗</a>
     <artifact-local><div class="setline hidden" data-setline></div></artifact-local>
     <artifact-local>
     <div class="slot-foot"><button class="notebtn" type="button" data-action="note">✎ note</button></div>
@@ -414,6 +417,7 @@ textarea.nbox { width: 100%; min-height: 7.5rem; resize: vertical; font: 17px/1.
   <div class="slot" data-mv="hinge" data-sets="2">
     <div class="slot-head"><artifact-local><button class="ring" type="button" data-action="ring" aria-label="Mark done"></button></artifact-local><span class="slot-name ed" data-key="st.hinge.name">Kickstand Hinge</span><span class="slot-target ed" data-key="st.hinge.target">2×8–12 /side</span></div>
     <span class="slot-cue ed" data-key="st.hinge.cue">Using a weight or backpack. Flat back, knees over feet.</span>
+    <a class="demolink" href="https://youtu.be/8VfPrhl_N3o" target="_blank" rel="noopener">Watch the form demo · 0:50 ↗</a>
     <artifact-local><div class="setline hidden" data-setline></div></artifact-local>
     <artifact-local>
     <div class="slot-foot"><button class="notebtn" type="button" data-action="note">✎ note</button></div>
@@ -424,6 +428,7 @@ textarea.nbox { width: 100%; min-height: 7.5rem; resize: vertical; font: 17px/1.
     <div class="slot-head"><artifact-local><button class="ring" type="button" data-action="ring" aria-label="Mark done"></button></artifact-local><span class="slot-name ed" data-key="st.row.name">One-arm row</span><span class="slot-target ed" data-key="st.row.target">2×8–12 /side</span></div>
     <span class="slot-cue ed" data-key="st.row.cue">Backpack loaded with your home weights. Three seconds up, three down.</span>
     <span class="slot-sub ed" data-key="st.row.sub">When you can do 12 with reps to spare, add a little weight to the bag.</span>
+    <a class="demolink" href="https://youtu.be/xra8y8R2FlU" target="_blank" rel="noopener">Watch the form demo · 0:53 ↗</a>
     <artifact-local><div class="setline hidden" data-setline></div></artifact-local>
     <artifact-local>
     <div class="slot-foot"><button class="notebtn" type="button" data-action="note">✎ note</button></div>
