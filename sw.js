@@ -1,9 +1,10 @@
 /* Joe's Practice Map — offline support.
    Shell is precached; the practice MP3s listed in AUDIO (this week: audio/emotional-inquiry.mp3,
-   Joe Hudson's Emotional Inquiry) are cached best-effort at install and served with Range
-   support so seeking works offline. Add Tanner's own recordings here when they land and bump
-   CACHE. copy.json is never served from cache (the app fetches it with cache: 'no-store'). */
-var CACHE = "joe-map-v4";
+   Joe Hudson's Emotional Inquiry with Tanner's Joe-specific cut-ins spliced in, 13:24) are
+   cached best-effort at install and served with Range support so seeking works offline. Add
+   Tanner's own recordings here when they land and bump CACHE. copy.json is never served from
+   cache (the app fetches it with cache: 'no-store'). */
+var CACHE = "joe-map-v5";
 var SHELL = ["./", "./index.html", "./manifest.webmanifest",
              "./icon-192.png", "./icon-512.png", "./apple-touch-icon.png"];
 var AUDIO = ["./audio/emotional-inquiry.mp3"];
