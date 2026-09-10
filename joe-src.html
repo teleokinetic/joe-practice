@@ -2,8 +2,9 @@
 <!--
   Joe's Practice Map — live site source (2026-08-22), B "Today first" skin on every screen. Generated into index.html by wrap.py.
   Same architecture and JS as the vault proof (home → screens, #edit copy mode with data-keys,
-  "Copy for Claude", quick-note sheet, Strength day-screen port). Audio: audio/emotional-inquiry.mp3 this week; Tanner's
-  recordings join it later. Mobile-first single column (max 480px) — no desktop shell.
+  "Copy for Claude", quick-note sheet, Strength day-screen port). Audio: audio/emotional-inquiry.mp3 (pain screen) and
+  audio/jaw-tongue-pelvis.mp3 (Library → lesson screen; Tanner's 2026-09-10 session recording, 33:08). Mobile-first single
+  column (max 480px) — no desktop shell.
   For GitHub Pages, wrap in the usual <!doctype html><html><head>…</head><body>…</body></html>
   and add manifest.webmanifest + sw.js + icons as in mikes-plan.
 -->
@@ -228,6 +229,12 @@ body[data-local-edit] .restdock { top: 52px; }
 .lrow { display: block; text-decoration: none; color: inherit; margin-top: 10px; }
 .lrow .lbody { display: flex; flex-direction: column; gap: 4px; }
 .lrow .go { display: inline-flex; align-items: center; gap: 4px; margin-top: 8px; font: 600 15px/1 var(--sans); color: var(--accent); }
+button.lrow { width: 100%; text-align: left; font: inherit; cursor: pointer; }
+/* lesson screen: liner notes under the player (Position / Focus / Territory + a line from the recording) */
+.orient { display: flex; flex-direction: column; gap: 10px; }
+.orient .fn { display: grid; grid-template-columns: 5.2em minmax(0, 1fr); column-gap: 10px; align-items: baseline; }
+.orient .fn .fk { margin: 0; }
+.pull { margin: 20px 0 0; padding: 18px 10px; border-top: 1px solid var(--rule-strong); border-bottom: 1px solid var(--rule-strong); text-align: center; font: italic 400 20px/1.4 var(--display); color: var(--text); text-wrap: balance; }
 .prow { margin-top: 10px; padding: 14px 16px; font: 400 20px/1.3 var(--display); color: var(--text); text-wrap: pretty; }
 .prow small { display: block; margin-top: 4px; font: italic 400 14px/1.4 var(--serif); color: var(--muted); }
 
@@ -274,6 +281,7 @@ textarea.nbox { width: 100%; min-height: 7.5rem; resize: vertical; font: 17px/1.
     <button type="button" data-go="pain">Pain</button>
     <button type="button" data-go="strength">Strength</button>
     <button type="button" data-go="library">Library</button>
+    <button type="button" data-go="lesson">Jaw &amp; pelvis</button>
     <button type="button" data-go="principles">Principles</button>
     <button type="button" data-go="note">Weekly note</button>
   </div>
@@ -481,6 +489,13 @@ textarea.nbox { width: 100%; min-height: 7.5rem; resize: vertical; font: 17px/1.
   <div class="topbar"><button class="back" type="button" onclick="go('home')">‹ Home</button></div>
   <div class="stitle ed" role="heading" aria-level="2" data-key="library.title">Library</div>
   <p class="sintro ed" data-key="library.intro">Practice recordings.</p>
+  <button class="card lrow" type="button" onclick="go('lesson')">
+    <span class="lbody">
+      <span class="exname ed" data-key="lib.jtp.name">Jaw, Tongue &amp; Pelvis</span>
+      <span class="exbody ed" data-key="lib.jtp.what">Sensing that your pelvis and spine, your head, neck and jaw are all part of one integrated system.</span>
+    </span>
+    <span class="go">Listen · 33 min</span>
+  </button>
   <a class="card lrow" href="https://youtu.be/kOFQGXPjXrY" target="_blank" rel="noopener">
     <span class="lbody">
       <span class="exname ed" data-key="lib.1.name">Attuning to Spaciousness While Moving</span>
@@ -502,6 +517,34 @@ textarea.nbox { width: 100%; min-height: 7.5rem; resize: vertical; font: 17px/1.
     </span>
     <span class="go">Listen ↗</span>
   </a>
+</section>
+
+<!-- ================= LESSON · JAW, TONGUE & PELVIS (from the Library) ================= -->
+<section id="screen-lesson" class="screen">
+  <div class="topbar"><button class="back" type="button" onclick="go('library')">‹ Library</button></div>
+  <div class="stitle ed" role="heading" aria-level="2" data-key="lesson.jtp.title">Jaw, Tongue &amp; Pelvis</div>
+  <p class="sintro ed" data-key="lesson.jtp.intro">The lesson from our session on September 10th, as we did it.</p>
+
+  <div class="card paud">
+    <button class="play" id="lesson-play" type="button" aria-label="Play"><svg class="ic-play" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4.5v15l12-7.5z"></path></svg><svg class="ic-pause" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 4.5h4.5v15H6zM13.5 4.5H18v15h-4.5z"></path></svg></button>
+    <div class="lbody">
+      <div class="meta"><div class="exname ed" data-key="lesson.jtp.name">Jaw, Tongue &amp; Pelvis</div><span class="dur ed" data-key="lesson.jtp.dur">33 min</span></div>
+      <div class="exbody ed" data-key="lesson.jtp.what">Lying on your back. Small movements of the jaw and tongue, then the same movements joined to the head and to the tilting of the pelvis.</div>
+      <audio id="lesson-audio" preload="metadata" src="audio/jaw-tongue-pelvis.mp3"></audio>
+      <div class="prog" id="lesson-prog" role="slider" aria-label="Position" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" tabindex="0"><div class="prog-fill" id="lesson-fill"></div></div>
+      <div class="times"><span id="lesson-cur">0:00</span><span id="lesson-rem"></span></div>
+      <span class="fn credit ed" data-key="lesson.jtp.credit">Tanner Holman · from our session, 10 September 2026</span>
+    </div>
+  </div>
+
+  <p class="lbl psec ed" data-key="lesson.jtp.orient.label">Orientation</p>
+  <div class="card orient">
+    <span class="fn"><span class="fk ed" data-key="lesson.jtp.o1.k">Position</span><span class="ed" data-key="lesson.jtp.o1">lying on your back · knees bent, feet standing · fingertips at the chin for a few of the moves</span></span>
+    <span class="fn"><span class="fk ed" data-key="lesson.jtp.o2.k">Focus</span><span class="ed" data-key="lesson.jtp.o2">the jaw and tongue leading · head and pelvis tilting and rolling together · small enough that the breath stays free</span></span>
+    <span class="fn"><span class="fk ed" data-key="lesson.jtp.o3.k">Territory</span><span class="ed" data-key="lesson.jtp.o3">tongue · lower jaw · neck · between the shoulder blades · lower back · pelvis</span></span>
+  </div>
+
+  <p class="pull ed" data-key="lesson.jtp.quote">"These novel movements, they allow us to disentangle habits of holding that we wouldn't see if we just kept ourselves still."</p>
 </section>
 
 <!-- ================= PRINCIPLES ================= -->
@@ -555,7 +598,7 @@ textarea.nbox { width: 100%; min-height: 7.5rem; resize: vertical; font: 17px/1.
 
 <script>
 /* ---------- navigation (per-viewer) ---------- */
-var SCREENS = ['home', 'pain', 'strength', 'library', 'principles', 'note'];
+var SCREENS = ['home', 'pain', 'strength', 'library', 'lesson', 'principles', 'note'];
 function go(name, force) {
   if (document.body.hasAttribute('data-local-edit') && !force) return; /* editing copy: cards don't navigate — use the edit bar's screen row */
   SCREENS.forEach(function (s) {
@@ -565,43 +608,52 @@ function go(name, force) {
   document.querySelectorAll('#edn button[data-go]').forEach(function (b) { b.classList.toggle('on', b.getAttribute('data-go') === name); });
   window.scrollTo(0, 0);
 }
-/* ---------- practice player (one control: the round button; native controls hidden) ---------- */
-var painA = document.getElementById('pain-audio');
-function playPain() { if (painA && painA.paused) { try { var p = painA.play(); if (p && p.catch) p.catch(function () {}); } catch (e) {} } }
-(function () {
-  var b = document.getElementById('pain-play'), prog = document.getElementById('pain-prog'), fill = document.getElementById('pain-fill'), cur = document.getElementById('pain-cur'), rem = document.getElementById('pain-rem');
-  if (!painA || !b) return;
-  function mmss(s) { s = Math.max(0, Math.round(s || 0)); return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0'); }
+/* ---------- practice players (one control each: the round button; native controls hidden) ----------
+   Two players share this code: the pain screen (pain-*) and the Library lesson (lesson-*). Starting one
+   pauses the other, and the lock-screen / earbud controls (Media Session) follow whichever played last. */
+var PLAYERS = [];
+function mmss(s) { s = Math.max(0, Math.round(s || 0)); return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0'); }
+function edText(k, d) { var el = document.querySelector('[data-key="' + k + '"]'); return el && el.textContent.trim() ? el.textContent.trim() : d; }
+function safePlay(a) { if (a && a.paused) { try { var p = a.play(); if (p && p.catch) p.catch(function () {}); } catch (e) {} } }
+function bindPlayer(prefix, nameKey, creditKey, defaultName) {
+  var a = document.getElementById(prefix + '-audio'), b = document.getElementById(prefix + '-play'), prog = document.getElementById(prefix + '-prog'), fill = document.getElementById(prefix + '-fill'), cur = document.getElementById(prefix + '-cur'), rem = document.getElementById(prefix + '-rem');
+  if (!a || !b) return null;
   function paint() {
-    var d = painA.duration || 0, t = painA.currentTime || 0, pct = d ? (t / d) * 100 : 0;
+    var d = a.duration || 0, t = a.currentTime || 0, pct = d ? (t / d) * 100 : 0;
     fill.style.width = pct + '%'; prog.setAttribute('aria-valuenow', String(Math.round(pct)));
     cur.textContent = mmss(t); rem.textContent = d ? '−' + mmss(d - t) : '';
-    var playing = !painA.paused && !painA.ended;
+    var playing = !a.paused && !a.ended;
     b.classList.toggle('is-playing', playing); b.setAttribute('aria-label', playing ? 'Pause' : 'Play');
   }
-  b.onclick = function () { if (painA.paused) playPain(); else painA.pause(); };
-  ['timeupdate', 'play', 'pause', 'loadedmetadata', 'durationchange', 'seeked'].forEach(function (ev) { painA.addEventListener(ev, paint); });
-  painA.addEventListener('ended', function () { painA.currentTime = 0; paint(); });
-  function seekTo(x) { var r = prog.getBoundingClientRect(); var f = Math.max(0, Math.min(1, (x - r.left) / r.width)); if (painA.duration) { painA.currentTime = f * painA.duration; paint(); } }
+  b.onclick = function () { if (a.paused) safePlay(a); else a.pause(); };
+  ['timeupdate', 'play', 'pause', 'loadedmetadata', 'durationchange', 'seeked'].forEach(function (ev) { a.addEventListener(ev, paint); });
+  a.addEventListener('ended', function () { a.currentTime = 0; paint(); });
+  a.addEventListener('play', function () {
+    PLAYERS.forEach(function (o) { if (o !== a && !o.paused) o.pause(); });
+    if ('mediaSession' in navigator && window.MediaMetadata) {
+      try {
+        navigator.mediaSession.metadata = new MediaMetadata({ title: edText(nameKey, defaultName), artist: edText(creditKey, ''), album: edText('title', "Joe's Practice Map"), artwork: [{ src: 'icon-512.png', sizes: '512x512', type: 'image/png' }] });
+        navigator.mediaSession.setActionHandler('play', function () { safePlay(a); });
+        navigator.mediaSession.setActionHandler('pause', function () { a.pause(); });
+        navigator.mediaSession.setActionHandler('seekbackward', function () { a.currentTime = Math.max(0, a.currentTime - 15); });
+        navigator.mediaSession.setActionHandler('seekforward', function () { a.currentTime = Math.min(a.duration || 0, a.currentTime + 15); });
+      } catch (e) {}
+    }
+  });
+  function seekTo(x) { var r = prog.getBoundingClientRect(); var f = Math.max(0, Math.min(1, (x - r.left) / r.width)); if (a.duration) { a.currentTime = f * a.duration; paint(); } }
   var drag = false;
   prog.addEventListener('pointerdown', function (e) { drag = true; try { prog.setPointerCapture(e.pointerId); } catch (err) {} seekTo(e.clientX); });
   prog.addEventListener('pointermove', function (e) { if (drag) seekTo(e.clientX); });
   prog.addEventListener('pointerup', function () { drag = false; });
   prog.addEventListener('pointercancel', function () { drag = false; });
-  prog.addEventListener('keydown', function (e) { if (!painA.duration) return; if (e.key === 'ArrowRight') { painA.currentTime = Math.min(painA.duration, painA.currentTime + 15); paint(); } if (e.key === 'ArrowLeft') { painA.currentTime = Math.max(0, painA.currentTime - 15); paint(); } });
-  /* lock-screen / earbud controls */
-  if ('mediaSession' in navigator && window.MediaMetadata) {
-    function txt(k, d) { var el = document.querySelector('[data-key="' + k + '"]'); return el && el.textContent.trim() ? el.textContent.trim() : d; }
-    try {
-      navigator.mediaSession.metadata = new MediaMetadata({ title: txt('pain.full.name', 'Emotional inquiry'), artist: txt('pain.full.credit', ''), album: txt('title', "Joe's Practice Map"), artwork: [{ src: 'icon-512.png', sizes: '512x512', type: 'image/png' }] });
-      navigator.mediaSession.setActionHandler('play', playPain);
-      navigator.mediaSession.setActionHandler('pause', function () { painA.pause(); });
-      navigator.mediaSession.setActionHandler('seekbackward', function () { painA.currentTime = Math.max(0, painA.currentTime - 15); });
-      navigator.mediaSession.setActionHandler('seekforward', function () { painA.currentTime = Math.min(painA.duration || 0, painA.currentTime + 15); });
-    } catch (e) {}
-  }
+  prog.addEventListener('keydown', function (e) { if (!a.duration) return; if (e.key === 'ArrowRight') { a.currentTime = Math.min(a.duration, a.currentTime + 15); paint(); } if (e.key === 'ArrowLeft') { a.currentTime = Math.max(0, a.currentTime - 15); paint(); } });
   paint();
-})();
+  PLAYERS.push(a);
+  return a;
+}
+var painA = bindPlayer('pain', 'pain.full.name', 'pain.full.credit', 'Emotional inquiry');
+var lessonA = bindPlayer('lesson', 'lesson.jtp.name', 'lesson.jtp.credit', 'Jaw, Tongue & Pelvis');
+function playPain() { safePlay(painA); } /* Home hero: open the pain screen and start the recording */
 document.getElementById('edn').addEventListener('click', function (ev) { var b = ev.target.closest('button[data-go]'); if (b) go(b.getAttribute('data-go'), true); });
 
 /* ---------- copy editing (Tanner: open with #edit) ----------
