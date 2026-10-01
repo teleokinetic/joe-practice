@@ -119,7 +119,7 @@ p.nstatus { margin: 10px 0 0; }
 p.nstatus:empty { display: none; }
 
 /* ---- 4. quick note: + in the bar on every screen; the sheet drops from it ---- */
-#fab { position: fixed; z-index: 30; top: calc(var(--safe-t) + 10px); right: var(--edge); width: 40px; height: 40px; border: 0; border-radius: 50%; background: var(--wash); color: var(--accent); display: grid; place-items: center; cursor: pointer; transition: background .15s ease, transform .2s var(--ease); }
+#fab { position: absolute; z-index: 2; top: calc(var(--safe-t) + 8px); right: 16px; width: 40px; height: 40px; border: 0; border-radius: 50%; background: var(--wash); color: var(--accent); display: grid; place-items: center; cursor: pointer; transition: background .15s ease, transform .2s var(--ease); }
 #fab svg { stroke: currentColor; transition: transform .25s var(--ease); }
 #fab:active { transform: scale(.92); }
 #fab[aria-expanded="true"] { background: var(--accent); color: var(--on-accent); }
@@ -147,9 +147,9 @@ body[data-local-edit] .ctitle { display: none; }
 #editbar .edn button { min-height: 32px; padding: 0 12px; font-size: 13px; background: var(--sunk); color: var(--muted); }
 #editbar .edn button.on { background: var(--accent); color: var(--on-accent); }
 /* an emptied copy slot vanishes for Joe (label and all) and comes back in edit mode so it can be refilled */
-.fn:has(> .ed:empty), p.footnote.ed:empty, .pstep:has(> .lbody > .exname:empty), .exbody.ed:empty { display: none; }
+.fn:has(> .ed:empty), p.footnote.ed:empty, p.sintro.ed:empty, p.lbl.ed:empty, .pstep:has(> .lbody > .exname:empty), .exbody.ed:empty { display: none; }
 body[data-local-edit] .fn:has(> .ed:empty), body[data-local-edit] .pstep:has(> .lbody > .exname:empty) { display: grid; }
-body[data-local-edit] p.footnote.ed:empty, body[data-local-edit] .exbody.ed:empty { display: block; min-height: 1.2em; }
+body[data-local-edit] p.footnote.ed:empty, body[data-local-edit] p.sintro.ed:empty, body[data-local-edit] p.lbl.ed:empty, body[data-local-edit] .exbody.ed:empty { display: block; min-height: 1.2em; }
 body[data-local-edit] .fn:has(> .ed:empty) { display: block; }
 body[data-local-edit] .ed { outline: 1px dashed var(--wash-2); outline-offset: 2px; border-radius: 2px; cursor: text; -webkit-user-select: text; user-select: text; }
 body[data-local-edit] .ed:focus { outline: 2px solid var(--accent); outline-offset: 2px; }
@@ -159,10 +159,7 @@ body[data-local-edit] .edlink { display: none; }
 /* ---- 6. home ---- */
 .hero { position: relative; width: 100%; margin-top: 8px; text-align: left; cursor: pointer; background: var(--sunk-2); border: 0; border-radius: var(--r-lg); padding: 22px 20px 20px; display: flex; flex-direction: column; gap: 8px; transition: transform .2s var(--ease); }
 .hero:active { transform: scale(.985); }
-.hero .glyph { position: absolute; top: 18px; right: 18px; color: var(--accent); stroke: currentColor; opacity: .5; }
-.hero .glyph .halo { transform-origin: 22px 22px; animation: breathe 7s ease-in-out infinite; }
-@keyframes breathe { 0%, 100% { transform: scale(.86); opacity: .55; } 50% { transform: scale(1); opacity: 1; } }
-.hero .hname { font: 400 30px/1.08 var(--display); color: var(--head); letter-spacing: -.015em; padding-right: 56px; text-wrap: balance; }
+.hero .hname { font: 400 30px/1.08 var(--display); color: var(--head); letter-spacing: -.015em; text-wrap: balance; }
 .hero .hsub { font: 16px/1.42 var(--ui); color: var(--soft); text-wrap: pretty; }
 .hero .cta { margin-top: 10px; align-self: flex-start; display: inline-flex; align-items: center; gap: 9px; height: 46px; padding: 0 20px 0 16px; border-radius: 999px; background: var(--accent); color: var(--on-accent); font: 600 16px/1 var(--ui); }
 .hero .cta svg { fill: currentColor; }
@@ -352,6 +349,8 @@ textarea.nbox { display: block; width: 100%; min-height: 8rem; resize: none; fon
 textarea.nbox:focus { box-shadow: var(--shadow), 0 0 0 2px var(--accent); }
 textarea::placeholder { color: var(--muted); opacity: .8; }
 .note-compose { margin-top: 4px; }
+.note-compose .footnote { margin: 10px 4px 0; }
+#screen-note .stitle { margin-bottom: 14px; }
 .note-compose > .lbl { margin-left: 4px; }
 .qlist { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
 .qlist li { position: relative; display: flex; flex-direction: column; gap: 6px; padding: 14px 48px 14px 16px; background: var(--card); border-radius: var(--r); box-shadow: var(--shadow); animation: screenIn .25s var(--ease) both; }
@@ -412,7 +411,6 @@ textarea::placeholder { color: var(--muted); opacity: .8; }
   </div>
 
   <button class="hero" type="button" onclick="go('pain'); playPain();">
-    <svg class="glyph" width="44" height="44" viewBox="0 0 44 44" fill="none" stroke-width="1.8" aria-hidden="true"><circle class="halo" cx="22" cy="22" r="17"></circle><circle cx="22" cy="22" r="4" fill="currentColor" stroke="none"></circle></svg>
     <span class="hname ed" data-key="week.pain.name">Relationship to pain</span>
     <span class="hsub ed" data-key="week.pain.body">Four times a week. Become familiar and friendly with the feelings around the pain.</span>
     <span class="cta"><svg width="15" height="15" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4.5v15l12-7.5z"></path></svg><span class="ed" data-key="week.pain.cta">Emotional inquiry · 13 min</span></span>
@@ -699,9 +697,9 @@ textarea::placeholder { color: var(--muted); opacity: .8; }
 <section id="screen-note" class="screen">
   <div class="topbar"><button class="back" type="button" onclick="go('home')"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m14.5 5.5-6.5 6.5 6.5 6.5"></path></svg>Home</button><span class="ctitle" aria-hidden="true"></span><artifact-local><button class="reset" type="button" onclick="clearNote()">Clear draft</button></artifact-local></div>
   <div class="stitle ed" role="heading" aria-level="2" data-key="note.title">Your notes</div>
-  <p class="sintro ed" data-key="note.intro">Feel free to share me any notes that come up.</p>
+  <p class="sintro ed" data-key="note.intro"></p>
   <div class="note-compose">
-  <p class="lbl ed" data-key="note.compose.label">What are you noticing?</p>
+  <p class="lbl ed" data-key="note.compose.label"></p>
   <artifact-local>
     <textarea class="nbox" id="note-main" placeholder="This week…"></textarea>
     <div class="send-row">
@@ -709,6 +707,9 @@ textarea::placeholder { color: var(--muted); opacity: .8; }
       <button class="ghost" id="copy" type="button">Copy</button>
       <span class="nstatus" id="nstatus"></span>
     </div>
+  </artifact-local>
+  <p class="footnote ed" data-key="note.foot">Notes you've sent land in Tanner's inbox.</p>
+  <artifact-local>
     <div class="nhist" id="nhist"></div>
   </artifact-local>
   </div>
@@ -720,7 +721,6 @@ textarea::placeholder { color: var(--muted); opacity: .8; }
     <div class="qmore" id="qmore"></div>
     <button class="reset" id="copyall" type="button" hidden>Copy all notes</button>
   </artifact-local>
-  <p class="footnote ed" data-key="note.foot">Notes you send land in Tanner's inbox. If sending fails, your mail app opens with the note filled in.</p>
 </section>
 
 </main>
@@ -763,6 +763,8 @@ function barTitle() {
 var scrolledNow = false;
 function onScroll() { var on = window.scrollY > 44; if (on !== scrolledNow) { scrolledNow = on; document.body.classList.toggle('scrolled', on); } }
 window.addEventListener('scroll', onScroll, { passive: true });
+/* the + rides in the active screen's bar, so the two move as one (including the iPhone's overscroll bounce) */
+function dockFab(name) { var f = document.getElementById('fab'), tb = document.querySelector('#screen-' + (name || activeScreen()) + ' .topbar'); if (f && tb && f.parentNode !== tb) tb.appendChild(f); }
 function stFinishReady() { var b = document.getElementById('st-finish'); if (b && typeof stDoneCount === 'function') b.classList.toggle('ready', stDoneCount() > 0); }
 /* ---------- navigation (per-viewer) ---------- */
 var SCREENS = ['home', 'pain', 'strength', 'library', 'lesson', 'principles', 'note'];
@@ -774,7 +776,7 @@ function go(name, force) {
   });
   document.querySelectorAll('#edn button[data-go]').forEach(function (b) { b.classList.toggle('on', b.getAttribute('data-go') === name); });
   window.scrollTo(0, 0);
-  barTitle(); onScroll();
+  barTitle(); onScroll(); dockFab(name);
 }
 /* ---------- practice players (one control each: the round button; native controls hidden) ----------
    Two players share this code: the pain screen (pain-*) and the Library lesson (lesson-*). Starting one
@@ -1285,7 +1287,7 @@ document.getElementById('st-erase').onclick = function () {
   stEraseArmed = false; b.textContent = 'Erase'; st = stDefault(); stSave(); stRestCancel(); stRender(); stFlash(stD, 'Erased');
 };
 window.addEventListener('pageshow', function (e) { if (e.persisted) stAutoFinish(); });
-stAutoFinish(); stRender(); barTitle();
+stAutoFinish(); stRender(); barTitle(); dockFab();
 </script>
 <script>if ('serviceWorker' in navigator && location.protocol !== 'file:') { navigator.serviceWorker.register('sw.js').catch(function(){}); }</script>
 </body>
