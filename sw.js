@@ -4,7 +4,7 @@
    Tanner's 2026-09-10 session lesson, 33:08) are cached best-effort at install and served with Range
    support so seeking works offline. Add new recordings here and bump CACHE. copy.json is never served
    from cache (the app fetches it with cache: 'no-store'). */
-var CACHE = "joe-map-v6";
+var CACHE = "joe-map-v7";
 var SHELL = ["./", "./index.html", "./manifest.webmanifest",
              "./icon-192.png", "./icon-512.png", "./apple-touch-icon.png"];
 var AUDIO = ["./audio/emotional-inquiry.mp3", "./audio/jaw-tongue-pelvis.mp3"];

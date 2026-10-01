@@ -1,28 +1,53 @@
 <title>Joe's Practice Map</title>
 <!--
-  Joe's Practice Map — live site source (2026-08-22), B "Today first" skin on every screen. Generated into index.html by wrap.py.
-  Same architecture and JS as the vault proof (home → screens, #edit copy mode with data-keys,
-  "Copy for Claude", quick-note sheet, Strength day-screen port). Audio: audio/emotional-inquiry.mp3 (pain screen) and
-  audio/jaw-tongue-pelvis.mp3 (Library → lesson screen; Tanner's 2026-09-10 session recording, 33:08). Mobile-first single
-  column (max 480px) — no desktop shell.
-  For GitHub Pages, wrap in the usual <!doctype html><html><head>…</head><body>…</body></html>
-  and add manifest.webmanifest + sw.js + icons as in mikes-plan.
+  Joe's Practice Map — live site source. C "Quiet" skin (2026-09-30): one display serif + the phone's own UI face,
+  frosted sticky bar with a condensing title, grouped home menu, stepped practice outline, tactile rings and player,
+  warm dark mode. Same architecture, data-keys, element IDs and storage keys as the B "Today first" skin (2026-08-22),
+  so saved sessions, notes and copy edits carry over. Generated into index.html by wrap.py.
+  Audio: audio/emotional-inquiry.mp3 (pain screen) and audio/jaw-tongue-pelvis.mp3 (Library → lesson screen;
+  Tanner's 2026-09-10 session recording, 33:08). Mobile-first single column (max 480px) — no desktop shell.
 -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&family=Source+Sans+3:wght@400;500;600;700&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&display=swap">
 <style>
-/* ---- 1. tokens ---- */
+/* ---- 1. tokens ----
+   Layout: one 480px column; a frosted sticky bar per screen whose title condenses on scroll;
+   a card only where something is tappable or holds a group. Paper, ink and one slate blue. */
 :root {
   color-scheme: light;
-  --bg:#FAF7F1; --raised:#F1EBDE; --raised-2:#E9E1CF; --card:#FFFDF9;
-  --text:#2E2A24; --head:#2B3442; --soft:#4A463E; --muted:#665F51;
-  --accent:#3A5A80; --accent-hover:#2E4A6B; --wash:rgba(58,90,128,.10); --danger:#8A3B2E;
-  --rule:#E3DBCB; --rule-strong:#CBC1AC; --ink:#FBF9F4;
+  --bg:#F8F5EF; --bar:rgba(248,245,239,.84); --card:#FFFEFB; --sunk:#F0EADF; --sunk-2:#E9E1D0;
+  --text:#27241F; --head:#23303F; --soft:#4B463E; --muted:#6D665A;
+  --accent:#3A5A80; --accent-press:#2E4A6B; --wash:rgba(58,90,128,.09); --wash-2:rgba(58,90,128,.17); --on-accent:#FFFFFF;
+  --rule:rgba(70,55,30,.11); --rule-strong:rgba(70,55,30,.22); --danger:#9A3D2E;
+  --shadow:0 1px 1px rgba(60,45,20,.04), 0 2px 10px rgba(60,45,20,.05);
+  --shadow-pop:0 2px 6px rgba(40,30,15,.08), 0 18px 44px rgba(40,30,15,.16);
+  --scrim:rgba(30,26,20,.16);
   --display:"Newsreader","Iowan Old Style",Palatino,Georgia,serif;
-  --serif:"Source Serif 4",Georgia,serif;
-  --sans:"Source Sans 3","Helvetica Neue",Arial,system-ui,sans-serif;
-  --r:20px; --r-hero:24px; --r-in:14px; --col:480px;
-  --edge: max(16px, calc((100% - var(--col)) / 2 + 16px));
+  --ui:-apple-system,BlinkMacSystemFont,"SF Pro Text",system-ui,"Segoe UI","Helvetica Neue",Arial,sans-serif;
+  --r:18px; --r-lg:24px; --r-sm:12px; --col:480px;
+  --edge:max(16px, calc((100% - var(--col)) / 2 + 16px));
+  --ease:cubic-bezier(.2,.8,.2,1);
+  --safe-t:env(safe-area-inset-top, 0px); --safe-b:env(safe-area-inset-bottom, 0px);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --bg:#161513; --bar:rgba(22,21,19,.82); --card:#211F1C; --sunk:#1D1B18; --sunk-2:#2A2723;
+    --text:#ECE6DA; --head:#F2EDE3; --soft:#CFC7B8; --muted:#9D9587;
+    --accent:#93B3D8; --accent-press:#AEC7E4; --wash:rgba(147,179,216,.13); --wash-2:rgba(147,179,216,.22); --on-accent:#111821;
+    --rule:rgba(255,240,215,.08); --rule-strong:rgba(255,240,215,.17); --danger:#E3907E;
+    --shadow:0 0 0 1px rgba(255,240,215,.04); --shadow-pop:0 0 0 1px rgba(255,240,215,.07), 0 18px 44px rgba(0,0,0,.5);
+    --scrim:rgba(0,0,0,.42);
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --bg:#161513; --bar:rgba(22,21,19,.82); --card:#211F1C; --sunk:#1D1B18; --sunk-2:#2A2723;
+  --text:#ECE6DA; --head:#F2EDE3; --soft:#CFC7B8; --muted:#9D9587;
+  --accent:#93B3D8; --accent-press:#AEC7E4; --wash:rgba(147,179,216,.13); --wash-2:rgba(147,179,216,.22); --on-accent:#111821;
+  --rule:rgba(255,240,215,.08); --rule-strong:rgba(255,240,215,.17); --danger:#E3907E;
+  --shadow:0 0 0 1px rgba(255,240,215,.04); --shadow-pop:0 0 0 1px rgba(255,240,215,.07), 0 18px 44px rgba(0,0,0,.5);
+  --scrim:rgba(0,0,0,.42);
 }
 
 /* ---- 2. base ---- */
@@ -30,242 +55,315 @@
 [hidden] { display: none !important; }
 html { -webkit-text-size-adjust: 100%; }
 html, body { background: var(--bg); }
-body { margin: 0; color: var(--text); font: 17px/1.5 var(--serif); -webkit-font-smoothing: antialiased; min-height: 100dvh; }
+body { margin: 0; color: var(--text); font: 17px/1.5 var(--ui); letter-spacing: -.005em; -webkit-font-smoothing: antialiased; min-height: 100dvh; }
 a { color: var(--accent); }
-::selection { background: var(--accent); color: var(--ink); }
-:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 6px; }
-button { -webkit-tap-highlight-color: transparent; font: inherit; color: inherit; }
-main { max-width: var(--col); margin: 0 auto; padding: calc(14px + env(safe-area-inset-top, 0px)) 16px calc(28px + env(safe-area-inset-bottom, 0px)); }
+::selection { background: var(--wash-2); }
+:focus { outline: none; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 8px; }
+button { -webkit-tap-highlight-color: transparent; font: inherit; color: inherit; -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
+a { -webkit-tap-highlight-color: transparent; }
+svg { flex: none; }
+main { max-width: var(--col); margin: 0 auto; padding: 0 16px calc(36px + var(--safe-b)); }
 artifact-local { display: contents; }
 .screen { display: none; }
-.screen[data-local-active] { display: block; }
+.screen[data-local-active] { display: block; animation: screenIn .32s var(--ease) both; }
+@keyframes screenIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
 
 /* ---- 3. shared pieces ---- */
-.lbl { margin: 0; font: 600 13px/1.3 var(--sans); color: var(--accent); }
-.topbar { display: flex; align-items: center; justify-content: space-between; min-height: 44px; margin-bottom: 14px; padding-right: 56px; }
-.wordmark { font: 400 22px/1.1 var(--display); color: var(--accent); }
-.back { border: 0; background: none; cursor: pointer; min-height: 44px; padding: 0 12px 0 0; display: inline-flex; align-items: center; font: 600 15px/1 var(--sans); color: var(--accent); }
-.stitle { font: 400 30px/1.1 var(--display); color: var(--head); margin: 0 0 4px; text-wrap: balance; }
-.sintro { margin: 0 0 14px; font: 15px/1.4 var(--sans); color: var(--muted); }
-.footnote { margin: 14px 0 0; font: 15px/1.4 var(--sans); color: var(--muted); }
-.card { background: var(--card); border: 1px solid var(--rule); border-radius: var(--r); padding: 16px; }
-.soft { background: var(--raised); border: 0; }
-.chev { flex: none; stroke: var(--accent); }
-/* buttons: filled pill · outline pill · wash pill · bare */
-.send { display: inline-flex; align-items: center; justify-content: center; min-height: 44px; padding: 0 20px; border: 0; border-radius: 999px; background: var(--accent); color: var(--ink); font: 700 15px/1 var(--sans); cursor: pointer; transition: background .15s ease; }
-.send[disabled] { opacity: .55; cursor: default; }
-.ghost { display: inline-flex; align-items: center; justify-content: center; min-height: 40px; padding: 0 16px; border: 1px solid var(--rule-strong); border-radius: 999px; background: var(--card); color: var(--accent); font: 600 15px/1 var(--sans); cursor: pointer; }
-.ghost.danger { color: var(--danger); border-color: transparent; background: none; text-decoration: underline; text-underline-offset: 3px; padding: 0 8px; }
-.pillbtn { display: inline-flex; align-items: center; min-height: 40px; padding: 0 16px; border: 0; border-radius: 999px; background: var(--wash); color: var(--accent); font: 600 15px/1 var(--sans); cursor: pointer; }
-.reset { border: 0; background: none; cursor: pointer; min-height: 44px; padding: 0 0 0 12px; display: inline-flex; align-items: center; font: 600 13px/1 var(--sans); color: var(--muted); text-decoration: underline; text-underline-offset: 3px; }
-.nstatus { font: 15px/1.4 var(--sans); color: var(--muted); }
+.lbl { margin: 0; font: 600 12.5px/1.3 var(--ui); letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+/* the bar: sticky + frosted; the big title below condenses into it once you scroll */
+.topbar { position: sticky; top: 0; z-index: 20; display: flex; align-items: center; justify-content: space-between; gap: 8px; min-height: 52px; margin: 0 -16px 6px; padding: var(--safe-t) 60px 0 16px; padding-top: calc(var(--safe-t) + 4px); background: var(--bar); -webkit-backdrop-filter: saturate(1.6) blur(18px); backdrop-filter: saturate(1.6) blur(18px); box-shadow: 0 1px 0 transparent; transition: box-shadow .2s ease; }
+body.scrolled .topbar { box-shadow: 0 1px 0 var(--rule); }
+.ctitle { position: absolute; left: 50%; bottom: 0; height: 48px; display: flex; align-items: center; max-width: 52%; transform: translate(-50%, 4px); opacity: 0; pointer-events: none; font: 600 16px/1.2 var(--ui); color: var(--head); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; transition: opacity .2s ease, transform .2s var(--ease); }
+body.scrolled .ctitle { opacity: 1; transform: translate(-50%, 0); }
+.wordmark { font: 500 23px/1.1 var(--display); color: var(--head); letter-spacing: -.01em; }
+.back { position: relative; z-index: 1; border: 0; background: none; cursor: pointer; min-height: 44px; margin-left: -8px; padding: 0 12px 0 2px; display: inline-flex; align-items: center; gap: 1px; font: 400 17px/1 var(--ui); color: var(--accent); transition: opacity .15s ease; }
+.back svg { stroke: currentColor; }
+.back:active { opacity: .45; }
+.stitle { font: 400 34px/1.08 var(--display); color: var(--head); letter-spacing: -.015em; margin: 4px 0 6px; text-wrap: balance; }
+.sintro { margin: 0 0 20px; font: 16px/1.45 var(--ui); color: var(--muted); text-wrap: pretty; }
+.footnote { margin: 16px 0 0; font: 14px/1.45 var(--ui); color: var(--muted); }
+.card { background: var(--card); border: 0; border-radius: var(--r); padding: 16px; box-shadow: var(--shadow); }
+.soft { background: var(--sunk); box-shadow: none; }
+.chev { flex: none; stroke: var(--muted); opacity: .7; }
+/* buttons: filled · tinted · plain */
+.send { display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-height: 48px; padding: 0 22px; border: 0; border-radius: 999px; background: var(--accent); color: var(--on-accent); font: 600 16px/1 var(--ui); cursor: pointer; transition: background .15s ease, transform .15s var(--ease), opacity .15s ease; }
+.send:active { transform: scale(.97); background: var(--accent-press); }
+.send[disabled] { opacity: .5; cursor: default; }
+.ghost { display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-height: 44px; padding: 0 18px; border: 0; border-radius: 999px; background: var(--wash); color: var(--accent); font: 600 15px/1 var(--ui); cursor: pointer; transition: background .15s ease, transform .15s var(--ease); }
+.ghost:active { transform: scale(.97); background: var(--wash-2); }
+.ghost.danger { color: var(--danger); background: none; padding: 0 10px; }
+.ghost.danger:active { background: var(--wash); }
+.reset { border: 0; background: none; cursor: pointer; min-height: 44px; padding: 0; display: inline-flex; align-items: center; font: 400 16px/1 var(--ui); color: var(--accent); transition: opacity .15s ease; }
+.reset:active { opacity: .45; }
+.nstatus { font: 14px/1.4 var(--ui); color: var(--muted); }
 .nstatus.err { color: var(--danger); font-weight: 600; }
-p.nstatus { margin: 8px 0 0; }
+p.nstatus { margin: 10px 0 0; }
+p.nstatus:empty { display: none; }
 
-/* ---- 4. quick note: round + button top-right on every screen, sheet drops under it ---- */
-#fab { position: fixed; z-index: 30; top: calc(14px + env(safe-area-inset-top, 0px)); right: var(--edge); width: 44px; height: 44px; border: 0; border-radius: 50%; background: var(--wash); color: var(--accent); display: grid; place-items: center; cursor: pointer; transition: background .15s ease; }
-#fab svg { stroke: currentColor; }
-#sheet { position: fixed; z-index: 31; top: calc(66px + env(safe-area-inset-top, 0px)); right: var(--edge); left: var(--edge); max-width: 448px; margin-left: auto; background: var(--card); border: 1px solid var(--rule); border-radius: var(--r); padding: 16px; box-shadow: 0 1px 2px rgba(46,42,36,.08), 0 12px 32px rgba(46,42,36,.14); max-height: calc(100dvh - 90px); overflow: auto; }
-#sheet .lbl { margin-bottom: 8px; }
-#sheet textarea { width: 100%; min-height: 6rem; max-height: 30dvh; resize: vertical; font: 17px/1.5 var(--serif); color: var(--text); background: var(--bg); border: 1px solid var(--rule-strong); border-radius: var(--r-in); padding: 10px 12px; }
+/* ---- 4. quick note: + in the bar on every screen; the sheet drops from it ---- */
+#fab { position: fixed; z-index: 30; top: calc(var(--safe-t) + 10px); right: var(--edge); width: 40px; height: 40px; border: 0; border-radius: 50%; background: var(--wash); color: var(--accent); display: grid; place-items: center; cursor: pointer; transition: background .15s ease, transform .2s var(--ease); }
+#fab svg { stroke: currentColor; transition: transform .25s var(--ease); }
+#fab:active { transform: scale(.92); }
+#fab[aria-expanded="true"] { background: var(--accent); color: var(--on-accent); }
+#fab[aria-expanded="true"] svg { transform: rotate(45deg); }
+#scrim { position: fixed; inset: 0; z-index: 29; background: var(--scrim); animation: fadeIn .2s ease both; }
+@keyframes fadeIn { from { opacity: 0; } }
+#sheet { position: fixed; z-index: 31; top: calc(var(--safe-t) + 60px); right: var(--edge); left: var(--edge); max-width: 448px; margin-left: auto; background: var(--card); border-radius: var(--r-lg); padding: 16px; box-shadow: var(--shadow-pop); max-height: calc(100dvh - 90px); overflow: auto; transform-origin: calc(100% - 20px) -20px; animation: sheetIn .26s var(--ease) both; }
+@keyframes sheetIn { from { opacity: 0; transform: scale(.92) translateY(-6px); } }
+#sheet .lbl { margin-bottom: 10px; }
+#sheet textarea { display: block; width: 100%; min-height: 6.5rem; max-height: 30dvh; resize: none; font: 17px/1.5 var(--ui); color: var(--text); background: var(--sunk); border: 0; border-radius: var(--r-sm); padding: 12px 14px; }
 #sheet .rowb { display: flex; gap: 8px; justify-content: flex-end; margin-top: 12px; }
-body[data-local-edit] #fab, body[data-local-edit] #sheet { display: none; }
+#sheet .rowb .send, #sheet .rowb .ghost { min-height: 44px; }
+body[data-local-edit] #fab, body[data-local-edit] #sheet, body[data-local-edit] #scrim { display: none; }
 
 /* ---- 5. edit bar (Tanner: open with #edit) ---- */
-#editbar { display: none; position: sticky; top: 0; z-index: 25; align-items: center; gap: 8px 12px; flex-wrap: wrap; padding: calc(8px + env(safe-area-inset-top, 0px)) var(--edge) 8px; background: rgba(250,247,241,.94); backdrop-filter: blur(8px); border-bottom: 1px solid var(--rule); font: 13px/1.4 var(--sans); color: var(--muted); }
+#editbar { display: none; position: sticky; top: 0; z-index: 25; align-items: center; gap: 8px 12px; flex-wrap: wrap; padding: calc(8px + var(--safe-t)) var(--edge) 8px; background: var(--bar); -webkit-backdrop-filter: blur(16px); backdrop-filter: blur(16px); box-shadow: 0 1px 0 var(--rule); font: 13px/1.4 var(--ui); color: var(--muted); }
 body[data-local-edit] #editbar { display: flex; }
+body[data-local-edit] .topbar { position: relative; background: none; -webkit-backdrop-filter: none; backdrop-filter: none; padding-top: 4px; box-shadow: none; }
+body[data-local-edit] .ctitle { display: none; }
 #editbar .grow { flex: 1 1 auto; }
-#editbar .st { min-width: 4rem; text-align: right; font: 600 12px/1.4 var(--sans); color: var(--accent); }
-#editbar button { min-height: 36px; padding: 0 14px; border: 1px solid var(--rule-strong); border-radius: 999px; background: var(--card); color: var(--accent); font: 600 14px/1 var(--sans); cursor: pointer; }
-#editbar .edn { flex-basis: 100%; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; padding-top: 6px; border-top: 1px solid var(--rule); margin-top: 2px; }
-#editbar .ednl { font: 600 12px/1 var(--sans); color: var(--muted); margin-right: 2px; }
-#editbar .edn button { min-height: 32px; padding: 0 12px; font-size: 13px; border-color: var(--rule); color: var(--muted); }
-#editbar .edn button.on { background: var(--accent); border-color: var(--accent); color: var(--ink); }
+#editbar .st { min-width: 4rem; text-align: right; font: 600 12px/1.4 var(--ui); color: var(--accent); }
+#editbar button { min-height: 36px; padding: 0 14px; border: 0; border-radius: 999px; background: var(--wash); color: var(--accent); font: 600 14px/1 var(--ui); cursor: pointer; }
+#editbar .edn { flex-basis: 100%; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; padding-top: 8px; border-top: 1px solid var(--rule); margin-top: 2px; }
+#editbar .ednl { font: 600 12px/1 var(--ui); color: var(--muted); margin-right: 2px; }
+#editbar .edn button { min-height: 32px; padding: 0 12px; font-size: 13px; background: var(--sunk); color: var(--muted); }
+#editbar .edn button.on { background: var(--accent); color: var(--on-accent); }
 /* an emptied copy slot vanishes for Joe (label and all) and comes back in edit mode so it can be refilled */
 .fn:has(> .ed:empty), p.footnote.ed:empty, .pstep:has(> .lbody > .exname:empty), .exbody.ed:empty { display: none; }
 body[data-local-edit] .fn:has(> .ed:empty), body[data-local-edit] .pstep:has(> .lbody > .exname:empty) { display: grid; }
 body[data-local-edit] p.footnote.ed:empty, body[data-local-edit] .exbody.ed:empty { display: block; min-height: 1.2em; }
 body[data-local-edit] .fn:has(> .ed:empty) { display: block; }
-body[data-local-edit] .ed { outline: 1px dashed rgba(58,90,128,.35); outline-offset: 2px; border-radius: 2px; cursor: text; }
+body[data-local-edit] .ed { outline: 1px dashed var(--wash-2); outline-offset: 2px; border-radius: 2px; cursor: text; -webkit-user-select: text; user-select: text; }
 body[data-local-edit] .ed:focus { outline: 2px solid var(--accent); outline-offset: 2px; }
 body[data-local-edit] .edlink { display: none; }
-.edlink { display: none; color: var(--accent); background: none; border: 0; padding: 12px 0; margin: -12px 0; cursor: pointer; font: 13px/1.4 var(--sans); text-decoration: underline; text-underline-offset: 3px; }
-footer { max-width: var(--col); margin: 0 auto; padding: 0 16px calc(24px + env(safe-area-inset-bottom, 0px)); display: flex; justify-content: space-between; gap: 12px 16px; flex-wrap: wrap; font: 13px/1.4 var(--sans); color: var(--muted); }
+.edlink { display: none; color: var(--muted); background: none; border: 0; padding: 12px 0; margin: -12px 0; cursor: pointer; font: 13px/1.4 var(--ui); }
 
 /* ---- 6. home ---- */
-.hero { position: relative; width: 100%; text-align: left; cursor: pointer; background: var(--raised-2); border: 0; border-radius: var(--r-hero); padding: 18px 18px 16px; display: flex; flex-direction: column; gap: 6px; }
-.hero .glyph { position: absolute; top: 16px; right: 16px; opacity: .35; stroke: var(--accent); }
-.hero .hname { font: 400 28px/1.1 var(--display); color: var(--head); padding-right: 56px; text-wrap: balance; }
-.hero .hsub { font: 15px/1.35 var(--sans); color: var(--soft); }
-.hero .cta { margin-top: 12px; align-self: flex-start; display: inline-flex; align-items: center; gap: 8px; height: 42px; padding: 0 16px 0 14px; border-radius: 999px; background: var(--accent); color: var(--ink); font: 700 15px/1 var(--sans); }
-.hero .cta svg { fill: var(--ink); flex: none; }
+.hero { position: relative; width: 100%; margin-top: 8px; text-align: left; cursor: pointer; background: var(--sunk-2); border: 0; border-radius: var(--r-lg); padding: 22px 20px 20px; display: flex; flex-direction: column; gap: 8px; transition: transform .2s var(--ease); }
+.hero:active { transform: scale(.985); }
+.hero .glyph { position: absolute; top: 18px; right: 18px; color: var(--accent); stroke: currentColor; opacity: .5; }
+.hero .glyph .halo { transform-origin: 22px 22px; animation: breathe 7s ease-in-out infinite; }
+@keyframes breathe { 0%, 100% { transform: scale(.86); opacity: .55; } 50% { transform: scale(1); opacity: 1; } }
+.hero .hname { font: 400 30px/1.08 var(--display); color: var(--head); letter-spacing: -.015em; padding-right: 56px; text-wrap: balance; }
+.hero .hsub { font: 16px/1.42 var(--ui); color: var(--soft); text-wrap: pretty; }
+.hero .cta { margin-top: 10px; align-self: flex-start; display: inline-flex; align-items: center; gap: 9px; height: 46px; padding: 0 20px 0 16px; border-radius: 999px; background: var(--accent); color: var(--on-accent); font: 600 16px/1 var(--ui); }
+.hero .cta svg { fill: currentColor; }
 .two { margin-top: 12px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
-.tile { min-height: 136px; display: flex; flex-direction: column; gap: 4px; text-align: left; cursor: pointer; transition: border-color .15s ease; }
-.tile .tname { font: 400 24px/1.1 var(--display); color: var(--head); }
-.tile .tsub { font: 14px/1.35 var(--sans); color: var(--muted); }
-.tile .tlast { margin-top: auto; padding-top: 10px; font: 600 13px/1.3 var(--sans); color: var(--accent); }
-.also { gap: 5px; }
-.also .lbl { margin-bottom: 2px; }
-.arow { font: 14px/1.35 var(--sans); color: var(--text); }
-.arow .an { font-weight: 600; }
-.arow .dose { color: var(--muted); margin-left: .25em; }
-.pills { margin-top: 14px; display: flex; flex-wrap: wrap; gap: 8px; }
-.goal { margin-top: 14px; padding: 14px 18px 16px; display: flex; flex-direction: column; gap: 6px; }
-.goal .gline { font: italic 400 18px/1.3 var(--display); color: var(--text); text-wrap: pretty; }
-.goal .know { font: 14px/1.35 var(--sans); color: var(--soft); }
-.goal .know .k { font-weight: 600; }
-.home-foot { margin-top: 18px; display: flex; justify-content: space-between; align-items: center; gap: 12px; font: 13px/1.4 var(--sans); color: var(--muted); }
+.tile { position: relative; min-height: 148px; display: flex; flex-direction: column; gap: 4px; text-align: left; cursor: pointer; padding: 16px; transition: transform .2s var(--ease); }
+button.tile:active { transform: scale(.97); }
+.tile .tchev { position: absolute; top: 18px; right: 14px; }
+.tile .tname { font: 400 25px/1.1 var(--display); color: var(--head); letter-spacing: -.01em; padding-right: 18px; }
+.tile .tsub { font: 14px/1.38 var(--ui); color: var(--muted); }
+.tile .tlast { margin-top: auto; padding-top: 10px; font: 600 13px/1.3 var(--ui); color: var(--accent); }
+.also { gap: 6px; }
+.also .lbl { margin-bottom: 4px; font-size: 11.5px; }
+.arow { display: flex; justify-content: space-between; align-items: baseline; gap: 6px; font: 14px/1.35 var(--ui); color: var(--text); }
+.arow .an { font-weight: 600; min-width: 0; }
+.arow .dose { flex: none; color: var(--muted); font-size: 13px; font-variant-numeric: tabular-nums; }
+/* grouped menu: one card, hairline rows */
+.navlist { margin-top: 12px; padding: 0; overflow: hidden; }
+.navrow { position: relative; width: 100%; min-height: 54px; display: flex; align-items: center; gap: 14px; padding: 0 14px 0 16px; border: 0; background: none; text-align: left; cursor: pointer; font: 17px/1.3 var(--ui); color: var(--text); transition: background .12s ease; }
+.navrow + .navrow::before { content: ''; position: absolute; top: 0; left: 56px; right: 0; height: 1px; background: var(--rule); }
+.navrow:active { background: var(--sunk); }
+.navrow .nico { width: 28px; height: 28px; border-radius: 8px; background: var(--wash); color: var(--accent); display: grid; place-items: center; }
+.navrow .nico svg { stroke: currentColor; }
+.navrow .nlabel { flex: 1; min-width: 0; }
+.navrow .badge { min-width: 22px; height: 22px; padding: 0 7px; border-radius: 999px; background: var(--accent); color: var(--on-accent); font: 600 13px/22px var(--ui); text-align: center; font-variant-numeric: tabular-nums; }
+.goal { margin-top: 12px; padding: 18px 20px 20px; display: flex; flex-direction: column; gap: 8px; background: none; box-shadow: inset 0 0 0 1px var(--rule-strong); }
+.goal .gline { font: italic 400 19px/1.38 var(--display); color: var(--text); text-wrap: pretty; }
+.home-foot { margin-top: 22px; display: flex; justify-content: space-between; align-items: center; gap: 12px; font: 13px/1.4 var(--ui); color: var(--muted); }
 
-/* ---- 7. pain ---- */
-.paud { display: grid; grid-template-columns: 44px minmax(0, 1fr); column-gap: 12px; align-items: start; }
-.paud .play { width: 44px; height: 44px; border: 0; padding: 0; border-radius: 50%; background: var(--accent); display: grid; place-items: center; cursor: pointer; transition: background .15s ease; }
-.paud .play svg { fill: var(--ink); margin-left: 2px; }
+/* ---- 7. players (pain + lesson) ---- */
+.paud { display: grid; grid-template-columns: 52px minmax(0, 1fr); column-gap: 14px; align-items: start; padding: 18px 16px 16px; }
+.paud .play { width: 52px; height: 52px; border: 0; padding: 0; border-radius: 50%; background: var(--accent); color: var(--on-accent); display: grid; place-items: center; cursor: pointer; transition: transform .2s var(--ease), background .15s ease; }
+.paud .play:active { transform: scale(.92); background: var(--accent-press); }
+.paud .play svg { fill: currentColor; margin-left: 3px; }
 .paud .play .ic-pause { display: none; margin-left: 0; }
 .paud .play.is-playing .ic-play { display: none; }
 .paud .play.is-playing .ic-pause { display: block; }
+.paud .play.is-playing { box-shadow: 0 0 0 6px var(--wash); }
 .paud audio { display: none; }
-.prog { position: relative; height: 4px; border-radius: 2px; background: var(--rule); margin-top: 10px; cursor: pointer; touch-action: none; }
-.prog::before { content: ''; position: absolute; left: 0; right: 0; top: -14px; bottom: -14px; }
-.prog-fill { height: 100%; width: 0; border-radius: 2px; background: var(--accent); }
-.times { display: flex; justify-content: space-between; margin-top: 5px; font: 600 12px/1.3 var(--sans); color: var(--muted); font-variant-numeric: tabular-nums; }
-.paud .lbody { display: flex; flex-direction: column; gap: 4px; }
-.paud .meta { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
-.exname { font: 600 17px/1.3 var(--serif); color: var(--text); text-wrap: balance; }
-.dur { font: 600 13px/1.4 var(--sans); color: var(--muted); white-space: nowrap; }
-.exbody { font: 15px/1.4 var(--sans); color: var(--soft); }
-.fn { display: block; font: 13px/1.4 var(--sans); color: var(--muted); }
+.prog { position: relative; height: 4px; border-radius: 2px; background: var(--rule-strong); margin-top: 14px; cursor: pointer; touch-action: none; transition: height .15s ease; }
+.prog::before { content: ''; position: absolute; left: -8px; right: -8px; top: -16px; bottom: -16px; }
+.prog-fill { position: relative; height: 100%; width: 0; border-radius: inherit; background: var(--accent); pointer-events: none; }
+.prog-fill::after { content: ''; position: absolute; right: -6px; top: 50%; width: 12px; height: 12px; margin-top: -6px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 0 3px var(--card); transition: transform .15s var(--ease); }
+.prog.drag { height: 6px; }
+.prog.drag .prog-fill::after { transform: scale(1.4); }
+.times { display: flex; justify-content: space-between; margin-top: 8px; font: 500 12.5px/1.3 var(--ui); color: var(--muted); font-variant-numeric: tabular-nums; }
+.paud .lbody { min-width: 0; display: flex; flex-direction: column; gap: 6px; }
+.paud .meta { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; padding-top: 2px; }
+.exname { font: 600 17px/1.3 var(--ui); color: var(--text); letter-spacing: -.01em; text-wrap: balance; }
+.dur { flex: none; font: 500 13px/1.4 var(--ui); color: var(--muted); white-space: nowrap; font-variant-numeric: tabular-nums; }
+.exbody { font: 15px/1.45 var(--ui); color: var(--soft); text-wrap: pretty; }
+.fn { display: block; font: 14px/1.45 var(--ui); color: var(--muted); }
 .fn .fk { font-weight: 600; color: var(--text); margin-right: .35em; }
-.paud .credit { margin-top: 4px; }
-.chip { display: inline-block; font: 600 12px/1.3 var(--sans); color: var(--muted); background: var(--raised); border-radius: 999px; padding: 3px 10px; }
-.psec { margin: 18px 0 8px; }
-.moves { padding: 2px 16px; }
-.pstep { display: grid; grid-template-columns: 24px minmax(0, 1fr); column-gap: 12px; align-items: start; padding: 12px 0; border-top: 1px solid var(--rule); }
-.pstep:first-child { border-top: 0; }
-.pstep .pn { padding-top: 3px; font: 600 13px/1.4 var(--sans); color: var(--muted); }
-.pstep .lbody { display: flex; flex-direction: column; gap: 3px; }
+.paud .credit { margin-top: 2px; font-size: 13px; }
+.psec { margin: 28px 0 10px 4px; }
+/* practice outline: a real sequence, so numbered stations on a thread */
+.moves { padding: 6px 16px; }
+.pstep { position: relative; display: grid; grid-template-columns: 26px minmax(0, 1fr); column-gap: 14px; align-items: start; padding: 12px 0; }
+.pstep:not(:last-child)::before { content: ''; position: absolute; left: 12.5px; top: 42px; bottom: -10px; width: 1px; background: var(--rule-strong); }
+.pstep .pn { position: relative; width: 26px; height: 26px; border-radius: 50%; background: var(--wash); display: grid; place-items: center; font: 600 13px/1 var(--ui); color: var(--accent); font-variant-numeric: tabular-nums; }
+.pstep .lbody { min-width: 0; display: flex; flex-direction: column; gap: 3px; padding-top: 2px; }
 .pstep .exbody { color: var(--muted); }
 
 /* ---- 8. strength ---- */
-.trail { display: flex; align-items: center; gap: 6px; margin: 2px 0 10px; flex-wrap: wrap; min-height: 14px; }
-.trail-pip { width: 11px; height: 11px; flex: none; border-radius: 4px 4px 4px 1.5px; border: 1.5px solid var(--rule-strong); }
-.trail-pip.on { background: var(--accent); border-color: var(--accent); }
-.trail-count { margin-left: 4px; font: 600 13px/1.4 var(--sans); color: var(--muted); font-variant-numeric: tabular-nums; }
-.restdock { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: var(--bg); padding: 6px 0 10px; margin: 0 -16px 2px; padding-left: 16px; padding-right: 16px; }
-.restdock::before { content: ''; position: absolute; left: 0; right: 0; bottom: 100%; height: env(safe-area-inset-top, 0px); background: var(--bg); }
+.trail { display: flex; align-items: center; gap: 4px; margin: 0 0 14px; min-height: 16px; }
+.trail-pip { flex: 1; height: 5px; border-radius: 3px; background: var(--rule-strong); transition: background .3s ease; }
+.trail-pip.on { background: var(--accent); }
+.trail-count { flex: none; margin-left: 8px; font: 600 13px/1.4 var(--ui); color: var(--muted); font-variant-numeric: tabular-nums; }
+.restdock { position: sticky; top: calc(var(--safe-t) + 60px); z-index: 15; margin: 0 0 12px; animation: dockIn .3s var(--ease) both; }
+@keyframes dockIn { from { opacity: 0; transform: translateY(-8px) scale(.98); } }
 body[data-local-edit] .restdock { top: 52px; }
-.rest-running { position: relative; overflow: hidden; background: var(--card); border: 1px solid var(--rule); border-radius: 999px; padding: 11px 16px 11px 20px; }
-.rest-fill { position: absolute; top: 0; bottom: 0; left: 0; width: 0; background: var(--raised-2); border-right: 2px solid var(--accent); transition: width .25s linear; }
+.rest-running { position: relative; overflow: hidden; background: var(--card); border-radius: 999px; padding: 8px 8px 8px 22px; box-shadow: var(--shadow-pop); }
+.rest-fill { position: absolute; top: 0; bottom: 0; left: 0; width: 0; background: var(--wash); transition: width .25s linear; }
 .rest-row { position: relative; display: flex; align-items: center; gap: 10px; }
-.rest-time { font: 700 32px/1 var(--sans); color: var(--head); font-variant-numeric: tabular-nums; min-width: 4.5rem; }
-.rest-label { flex: 1; min-width: 0; font: 14px/1.3 var(--sans); color: var(--muted); }
-.rest-mini { width: 40px; height: 40px; flex: none; border-radius: 50%; background: var(--raised); border: 1px solid var(--rule-strong); color: var(--muted); font: 16px var(--sans); cursor: pointer; }
-.rest-done { width: 100%; background: var(--accent); color: var(--ink); border: 0; border-radius: 999px; min-height: 48px; padding: 12px; font: 700 16px/1.2 var(--sans); cursor: pointer; animation: restpulse .9s ease-in-out infinite alternate; }
-@keyframes restpulse { from { filter: brightness(1); } to { filter: brightness(1.12); } }
+.rest-time { font: 600 30px/1 var(--ui); letter-spacing: -.02em; color: var(--head); font-variant-numeric: tabular-nums; min-width: 4.3rem; }
+.rest-label { flex: 1; min-width: 0; font: 14px/1.3 var(--ui); color: var(--muted); }
+.rest-mini { width: 44px; height: 44px; flex: none; border-radius: 50%; background: var(--sunk); border: 0; color: var(--muted); display: grid; place-items: center; cursor: pointer; transition: transform .15s var(--ease); }
+.rest-mini svg { stroke: currentColor; }
+.rest-mini:active { transform: scale(.9); }
+.rest-done { width: 100%; background: var(--accent); color: var(--on-accent); border: 0; border-radius: 999px; min-height: 56px; padding: 12px; font: 600 17px/1.2 var(--ui); cursor: pointer; box-shadow: var(--shadow-pop); animation: restpulse 1s ease-in-out infinite alternate; }
+@keyframes restpulse { from { box-shadow: var(--shadow-pop), 0 0 0 0 var(--wash-2); } to { box-shadow: var(--shadow-pop), 0 0 0 8px var(--wash); } }
 .slots { display: grid; gap: 10px; grid-template-columns: minmax(0, 1fr); }
-.slot { background: var(--card); border: 1px solid var(--rule); border-radius: var(--r); padding: 14px 16px; display: grid; grid-template-columns: 25px minmax(0, 1fr) auto; column-gap: 10px; row-gap: 2px; align-items: start; }
+.slot { background: var(--card); border-radius: var(--r); padding: 16px 16px 14px; box-shadow: var(--shadow); display: grid; grid-template-columns: 30px minmax(0, 1fr) auto; column-gap: 12px; row-gap: 4px; align-items: start; transition: padding .25s var(--ease); }
 .slot-head { display: contents; }
-.slot .ring { grid-column: 1; grid-row: 1; align-self: start; margin-top: -1px; }
-.slot-name { grid-column: 2; grid-row: 1; font: 600 17px/1.3 var(--serif); color: var(--text); text-wrap: balance; }
-.slot-target { grid-column: 3; grid-row: 1; padding-top: 3px; font: 600 13px/1.4 var(--sans); color: var(--muted); text-align: right; max-width: 8rem; font-variant-numeric: tabular-nums; }
-.slot-cue { grid-column: 2 / 4; display: block; font: 15px/1.4 var(--sans); color: var(--text); }
-.slot-sub { grid-column: 2 / 4; display: block; font: 15px/1.4 var(--sans); color: var(--muted); }
-.demolink { grid-column: 2 / 4; justify-self: start; display: inline-flex; align-items: center; gap: 4px; margin-top: 2px; font: 600 14px/1.4 var(--sans); color: var(--accent); text-decoration: none; }
-.setline { grid-column: 2; align-self: center; font: 600 13px/1.4 var(--sans); color: var(--accent); font-variant-numeric: tabular-nums; }
+.slot .ring { grid-column: 1; grid-row: 1; align-self: start; margin-top: -3px; }
+.slot-name { grid-column: 2; grid-row: 1; font: 600 17px/1.3 var(--ui); letter-spacing: -.01em; color: var(--text); text-wrap: balance; transition: opacity .2s ease; }
+.slot-target { grid-column: 3; grid-row: 1; padding-top: 2px; font: 500 13px/1.4 var(--ui); color: var(--muted); text-align: right; max-width: 8rem; font-variant-numeric: tabular-nums; transition: opacity .2s ease; }
+.slot-cue { grid-column: 2 / 4; display: block; font: 15px/1.45 var(--ui); color: var(--soft); }
+.slot-sub { grid-column: 2 / 4; display: block; font: 14px/1.45 var(--ui); color: var(--muted); }
+.demolink { grid-column: 2 / 4; justify-self: start; display: inline-flex; align-items: center; gap: 6px; margin-top: 4px; min-height: 32px; font: 600 14px/1.3 var(--ui); color: var(--accent); text-decoration: none; transition: opacity .15s ease; }
+.demolink svg { stroke: currentColor; }
+.demolink:active { opacity: .5; }
+.setline { grid-column: 2; align-self: center; font: 600 13px/1.4 var(--ui); color: var(--accent); font-variant-numeric: tabular-nums; }
 .setline.hidden { display: none; }
-.slot-foot { grid-column: 3; justify-self: end; align-self: center; display: flex; align-items: center; gap: 10px; margin: -2px 0 -4px; }
-.notebtn { position: relative; margin: 0 -6px 0 0; padding: 2px 6px; background: none; border: 0; cursor: pointer; font: 600 13px/1.4 var(--sans); color: var(--muted); text-decoration: underline; text-underline-offset: 3px; }
-.notebtn::before { content: ''; position: absolute; inset: -11px -6px; }
-.notebtn.has-note { color: var(--accent); font-weight: 700; text-decoration-thickness: 2px; }
+.slot-foot { grid-column: 3; justify-self: end; align-self: center; display: flex; align-items: center; gap: 10px; margin: 0 -6px -4px 0; }
+.notebtn { position: relative; display: inline-flex; align-items: center; gap: 5px; min-height: 32px; padding: 0 10px; background: none; border: 0; border-radius: 999px; cursor: pointer; font: 600 13px/1 var(--ui); color: var(--muted); transition: background .15s ease; }
+.notebtn svg { stroke: currentColor; }
+.notebtn::before { content: ''; position: absolute; inset: -6px -2px; }
+.notebtn:active { background: var(--sunk); }
+.notebtn.has-note { color: var(--accent); background: var(--wash); }
 .note-edit { grid-column: 2 / 4; }
-.note-edit textarea { width: 100%; min-height: 3.2rem; resize: vertical; font: 17px/1.5 var(--serif); color: var(--text); background: var(--bg); border: 1px solid var(--rule-strong); border-radius: var(--r-in); padding: 8px 12px; margin-top: 4px; }
-.pairmat { background: var(--raised); border-radius: var(--r-hero); padding: 8px; display: grid; gap: 8px; }
-.pairtag { display: flex; align-items: center; gap: 7px; padding: 4px 8px 2px 12px; font: 600 13px/1.4 var(--sans); color: var(--accent); flex-wrap: wrap; }
-.pairtag svg { width: 14px; height: 14px; flex: none; }
+.note-edit textarea { display: block; width: 100%; min-height: 3.4rem; resize: none; font: 17px/1.45 var(--ui); color: var(--text); background: var(--sunk); border: 0; border-radius: var(--r-sm); padding: 10px 12px; margin-top: 6px; }
+.pairmat { background: var(--sunk); border-radius: var(--r-lg); padding: 6px; display: grid; gap: 6px; }
+.pairtag { display: flex; align-items: center; gap: 7px; padding: 6px 8px 2px 12px; font: 600 13px/1.4 var(--ui); color: var(--muted); flex-wrap: wrap; }
+.pairtag svg { width: 15px; height: 15px; flex: none; color: var(--accent); }
 .pairmat.done .pairtag { display: none; }
-.ring { width: 25px; height: 25px; flex: none; border-radius: 50%; border: 2px solid var(--rule-strong); background: var(--bg); position: relative; padding: 0; cursor: pointer; }
-.ring::before { content: ''; position: absolute; inset: -12px; }
-.ring.on { background: var(--accent); border-color: var(--accent); }
-.ring.on::after { content: '✓'; position: absolute; inset: 0; display: grid; place-items: center; color: var(--ink); font-family: var(--sans); font-size: 13px; font-weight: 700; }
-.ring.counting, .ring.counting.on { background: transparent; border: none; }
-.ring.counting.on::after { content: none; }
-.ring.counting svg { position: absolute; inset: 0; width: 25px; height: 25px; }
-.ring-track { fill: none; stroke: var(--rule-strong); stroke-width: 2.5; }
-.ring-arc { fill: none; stroke: var(--accent); stroke-width: 3; stroke-linecap: round; transform: rotate(-90deg); transform-origin: center; transition: stroke-dashoffset .2s ease; }
+.ring { width: 30px; height: 30px; flex: none; border-radius: 50%; border: 2px solid var(--rule-strong); background: transparent; position: relative; padding: 0; cursor: pointer; transition: background .2s ease, border-color .2s ease, transform .2s var(--ease); }
+.ring::before { content: ''; position: absolute; inset: -10px; }
+.ring:active { transform: scale(.86); }
+.ring.on { background: var(--accent); border-color: var(--accent); animation: pop .35s var(--ease); }
+.ring.on::after, .ring.counting.on::after { content: ''; position: absolute; left: 50%; top: 46%; width: 7px; height: 12px; border: solid var(--on-accent); border-width: 0 2.4px 2.4px 0; transform: translate(-50%, -50%) rotate(45deg); }
+@keyframes pop { 40% { transform: scale(1.14); } }
+.ring.counting { background: transparent; border: none; }
+.ring.counting svg { position: absolute; inset: 0; width: 30px; height: 30px; }
+.ring-track { fill: none; stroke: var(--rule-strong); stroke-width: 2; }
+.ring-arc { fill: none; stroke: var(--accent); stroke-width: 2.6; stroke-linecap: round; transform: rotate(-90deg); transform-origin: center; transition: stroke-dashoffset .35s var(--ease), fill .2s ease; }
 .ring.counting.on .ring-track { fill: var(--accent); stroke: var(--accent); }
-.ring-count { position: absolute; inset: 0; display: grid; place-items: center; font: 600 13px/1 var(--sans); color: var(--accent); font-variant-numeric: tabular-nums; }
-.ring.counting.on .ring-count { color: var(--ink); font-weight: 700; }
-.slot.done { padding-top: 10px; padding-bottom: 10px; }
-.slot.done .slot-name, .slot.done .slot-target { opacity: .45; }
+.ring.counting.on { background: transparent; border: 0; }
+.ring-count { position: absolute; inset: 0; display: grid; place-items: center; font: 600 13px/1 var(--ui); color: var(--accent); font-variant-numeric: tabular-nums; }
+.slot.done { padding-top: 12px; padding-bottom: 12px; }
+.slot.done .slot-name, .slot.done .slot-target { opacity: .5; }
 .slot.done .slot-cue, .slot.done .slot-sub, .slot.done .demolink, .slot.done .slot-foot, .slot.done .note-edit, .slot.done .setline { display: none; }
-.finishbtn { width: 100%; margin-top: 14px; border: 1px solid var(--rule-strong); background: var(--card); color: var(--accent); border-radius: 999px; min-height: 48px; padding: 12px; font: 700 16px/1.2 var(--sans); cursor: pointer; }
-.finish-wrap { display: flex; flex-direction: column; gap: 10px; margin-top: 12px; }
-.finish-line { font: 400 20px/1.3 var(--display); color: var(--head); }
-.recap { background: var(--card); border: 1px solid var(--rule); border-radius: var(--r); padding: 10px 16px 4px; }
-.recap-head { margin-bottom: 4px; font: 600 13px/1.4 var(--sans); color: var(--accent); }
-.rrow { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; padding: 8px 0; border-top: 1px solid var(--rule); }
+.finishbtn { width: 100%; margin-top: 16px; border: 0; background: var(--wash); color: var(--accent); border-radius: 999px; min-height: 52px; padding: 12px; font: 600 17px/1.2 var(--ui); cursor: pointer; transition: background .2s ease, color .2s ease, transform .15s var(--ease); }
+.finishbtn.ready { background: var(--accent); color: var(--on-accent); }
+.finishbtn:active { transform: scale(.98); }
+.finish-wrap { display: flex; flex-direction: column; gap: 12px; margin-top: 14px; }
+#st-panel { animation: screenIn .3s var(--ease) both; }
+.finish-line { font: 400 24px/1.25 var(--display); color: var(--head); letter-spacing: -.01em; }
+.recap { background: var(--card); border-radius: var(--r); padding: 12px 16px 4px; box-shadow: var(--shadow); }
+.recap-head { margin-bottom: 4px; font: 600 12.5px/1.4 var(--ui); letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+.rrow { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; padding: 10px 0; border-top: 1px solid var(--rule); }
 .rrow:first-child { border-top: 0; }
-.rrow-name { font: 600 15px/1.4 var(--serif); color: var(--text); }
-.rrow-note { color: var(--accent); font-style: normal; font-size: 13px; margin-left: .3rem; }
-.rrow-num { font: 13px/1.4 var(--sans); color: var(--muted); white-space: nowrap; font-variant-numeric: tabular-nums; }
-.recap-extra { color: var(--muted); font: 13px/1.4 var(--sans); padding: 8px 0; border-top: 1px solid var(--rule); }
-.finish-wrap .nbox { margin-top: 0; min-height: 4.5rem; }
-.send-row { display: flex; align-items: center; gap: 8px 12px; margin-top: 12px; flex-wrap: wrap; }
-.sec { margin-top: 20px; display: flex; flex-direction: column; gap: 4px; }
-.nl { margin: 0; font-size: 17px; line-height: 1.45; color: var(--soft); }
-.nl .k { font-weight: 600; color: var(--text); }
-.hist { padding: 8px 0; border-top: 1px solid var(--rule); display: flex; flex-direction: column; gap: 2px; }
-.hist .d { font: 600 13px/1.4 var(--sans); color: var(--muted); }
-.hist .s { font: 15px/1.4 var(--sans); color: var(--soft); font-variant-numeric: tabular-nums; }
+.rrow-name { font: 500 15px/1.4 var(--ui); color: var(--text); }
+.rrow-note { color: var(--accent); font-style: normal; font-size: 12px; font-weight: 600; margin-left: .4rem; padding: 1px 7px; border-radius: 999px; background: var(--wash); }
+.rrow-num { font: 14px/1.4 var(--ui); color: var(--muted); white-space: nowrap; font-variant-numeric: tabular-nums; }
+.recap-extra { color: var(--muted); font: 14px/1.4 var(--ui); padding: 10px 0; border-top: 1px solid var(--rule); }
+.finish-wrap .nbox { margin-top: 0; min-height: 4.8rem; }
+.send-row { display: flex; align-items: center; gap: 10px 10px; margin-top: 12px; flex-wrap: wrap; }
+.finish-wrap .send-row { margin-top: 0; }
+.sec { margin-top: 32px; display: flex; flex-direction: column; gap: 6px; }
+.sec > .lbl { margin: 0 0 4px 4px; }
+.nl { margin: 0; font: 400 19px/1.45 var(--display); color: var(--soft); text-wrap: pretty; }
+.nl + .nl { margin-top: 4px; }
+.histcard { padding: 2px 16px; }
+.histcard:not(:has(.hist)) { display: none; }
+.hist { display: grid; grid-template-columns: 4.4rem minmax(0, 1fr); column-gap: 12px; row-gap: 2px; padding: 12px 0; border-top: 1px solid var(--rule); }
+.hist:first-child { border-top: 0; }
+.hist .d { grid-row: 1 / span 3; font: 600 14px/1.45 var(--ui); color: var(--text); font-variant-numeric: tabular-nums; }
+.hist .s { grid-column: 2; font: 14px/1.45 var(--ui); color: var(--soft); font-variant-numeric: tabular-nums; }
 .hist .s i { color: var(--muted); }
-.setrow { display: flex; gap: 8px 12px; flex-wrap: wrap; align-items: center; margin-top: 12px; font: 15px/1.4 var(--sans); color: var(--soft); }
-.setrow .setlabel { min-width: 5.5rem; font: 600 13px/1.4 var(--sans); color: var(--muted); }
+.histcard .ghost { margin: 4px 0 12px; }
+.settings { padding: 4px 16px; }
+.setrow { display: flex; gap: 8px 10px; flex-wrap: wrap; align-items: center; min-height: 56px; padding: 8px 0; font: 15px/1.4 var(--ui); color: var(--soft); }
+.setrow + .setrow { border-top: 1px solid var(--rule); }
+.setrow .setlabel { flex: 1 0 5.5rem; font: 400 16px/1.4 var(--ui); color: var(--text); }
+.setrow .ghost { min-height: 36px; padding: 0 14px; font-size: 14px; }
 .setrow .nstatus:not(:empty) { flex-basis: 100%; }
-.seg { display: inline-flex; border: 1px solid var(--rule-strong); border-radius: 999px; overflow: hidden; background: var(--card); }
-.seg button { font: 600 13px/1 var(--sans); min-height: 40px; padding: 0 14px; color: var(--muted); background: none; border: 0; cursor: pointer; }
-.seg button.on { background: var(--accent); color: var(--ink); }
-.version { margin-top: 12px; font: 11px/1.4 var(--sans); color: var(--muted); }
+/* segmented control: the chosen option is a raised chip on a sunk track */
+.seg { display: inline-flex; padding: 3px; gap: 2px; border-radius: 999px; background: var(--sunk); }
+.seg button { font: 600 13px/1 var(--ui); min-height: 32px; padding: 0 13px; color: var(--muted); background: none; border: 0; border-radius: 999px; cursor: pointer; font-variant-numeric: tabular-nums; transition: background .2s ease, color .2s ease, box-shadow .2s ease; }
+.seg button.on { background: var(--card); color: var(--accent); box-shadow: 0 1px 3px rgba(0,0,0,.12); }
+.version { margin: 12px 4px 0; font: 12px/1.4 var(--ui); color: var(--muted); }
 
-/* ---- 9. library · principles ---- */
-.lrow { display: block; text-decoration: none; color: inherit; margin-top: 10px; }
-.lrow .lbody { display: flex; flex-direction: column; gap: 4px; }
-.lrow .go { display: inline-flex; align-items: center; gap: 4px; margin-top: 8px; font: 600 15px/1 var(--sans); color: var(--accent); }
-button.lrow { width: 100%; text-align: left; font: inherit; cursor: pointer; }
-/* lesson screen: liner notes under the player (Position / Focus / Territory + a line from the recording) */
-.orient { display: flex; flex-direction: column; gap: 10px; }
-.orient .fn { display: grid; grid-template-columns: 5.2em minmax(0, 1fr); column-gap: 10px; align-items: baseline; }
-.orient .fn .fk { margin: 0; }
-.pull { margin: 20px 0 0; padding: 18px 10px; border-top: 1px solid var(--rule-strong); border-bottom: 1px solid var(--rule-strong); text-align: center; font: italic 400 20px/1.4 var(--display); color: var(--text); text-wrap: balance; }
-.prow { margin-top: 10px; padding: 14px 16px; font: 400 20px/1.3 var(--display); color: var(--text); text-wrap: pretty; }
-.prow small { display: block; margin-top: 4px; font: italic 400 14px/1.4 var(--serif); color: var(--muted); }
+/* ---- 9. library · lesson · principles ---- */
+.lrow { position: relative; display: grid; grid-template-columns: 40px minmax(0, 1fr); column-gap: 14px; align-items: start; text-decoration: none; color: inherit; margin-top: 10px; padding: 16px; transition: transform .2s var(--ease); }
+.lrow:active { transform: scale(.985); }
+.lrow .lico { width: 40px; height: 40px; border-radius: 50%; background: var(--wash); color: var(--accent); display: grid; place-items: center; }
+.lrow .lico svg { stroke: currentColor; }
+.lrow .lico.solid { background: var(--accent); color: var(--on-accent); }
+.lrow .lico.solid svg { fill: currentColor; stroke: none; margin-left: 2px; }
+.lrow .lbody { min-width: 0; display: flex; flex-direction: column; gap: 4px; }
+.lrow .go { grid-column: 2; display: inline-flex; align-items: center; gap: 5px; margin-top: 8px; font: 600 14px/1 var(--ui); color: var(--accent); }
+.lrow .go svg { stroke: currentColor; }
+button.lrow { width: 100%; border: 0; text-align: left; font: inherit; cursor: pointer; }
+.orient { display: flex; flex-direction: column; gap: 12px; }
+.orient .fn { display: grid; grid-template-columns: 5.4em minmax(0, 1fr); column-gap: 12px; align-items: baseline; font-size: 15px; }
+.orient .fn .fk { margin: 0; font-size: 13px; color: var(--muted); }
+.orient .fn > .ed:last-child { color: var(--soft); }
+.pull { margin: 32px 8px 0; padding: 0; text-align: center; font: italic 400 22px/1.4 var(--display); color: var(--text); text-wrap: balance; }
+.pull::before { content: ''; display: block; width: 28px; height: 1px; margin: 0 auto 18px; background: var(--rule-strong); }
+.plist { padding: 4px 18px; }
+.prow { padding: 16px 0; font: 400 21px/1.3 var(--display); color: var(--text); letter-spacing: -.005em; text-wrap: pretty; }
+.prow + .prow { border-top: 1px solid var(--rule); }
+.prow small { display: block; margin-top: 6px; font: 500 13px/1.4 var(--ui); letter-spacing: 0; color: var(--muted); }
 
-/* ---- 10. weekly note ---- */
-textarea.nbox { width: 100%; min-height: 7.5rem; resize: vertical; font: 17px/1.5 var(--serif); color: var(--text); background: var(--card); border: 1px solid var(--rule-strong); border-radius: var(--r-in); padding: 12px 14px; margin-top: 4px; }
+/* ---- 10. notes ---- */
+textarea.nbox { display: block; width: 100%; min-height: 8rem; resize: none; font: 17px/1.5 var(--ui); color: var(--text); background: var(--card); border: 0; border-radius: var(--r); padding: 14px 16px; margin-top: 8px; box-shadow: var(--shadow); transition: box-shadow .2s ease; }
+textarea.nbox:focus { box-shadow: var(--shadow), 0 0 0 2px var(--accent); }
+textarea::placeholder { color: var(--muted); opacity: .8; }
+.note-compose { margin-top: 4px; }
+.note-compose > .lbl { margin-left: 4px; }
 .qlist { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
-.qlist li { position: relative; display: flex; flex-direction: column; gap: 4px; padding: 12px 44px 12px 14px; background: var(--card); border: 1px solid var(--rule); border-radius: var(--r-in); }
+.qlist li { position: relative; display: flex; flex-direction: column; gap: 6px; padding: 14px 48px 14px 16px; background: var(--card); border-radius: var(--r); box-shadow: var(--shadow); animation: screenIn .25s var(--ease) both; }
 .qhead { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-.qlist .d { font: 600 13px/1.4 var(--sans); color: var(--muted); white-space: nowrap; }
-.qctx { font: 600 12px/1.3 var(--sans); color: var(--accent); background: var(--wash); border-radius: 999px; padding: 2px 9px; }
-.qt { font: 15px/1.45 var(--serif); color: var(--text); white-space: pre-wrap; }
-.qx { position: absolute; top: 4px; right: 4px; width: 40px; height: 40px; border: 0; background: none; color: var(--muted); font-size: 18px; line-height: 1; cursor: pointer; border-radius: 50%; display: grid; place-items: center; }
+.qlist .d { font: 600 13px/1.4 var(--ui); color: var(--muted); white-space: nowrap; }
+.qctx { font: 600 12px/1.3 var(--ui); color: var(--accent); background: var(--wash); border-radius: 999px; padding: 3px 9px; }
+.qt { font: 16px/1.45 var(--ui); color: var(--text); white-space: pre-wrap; overflow-wrap: anywhere; }
+.qx { position: absolute; top: 6px; right: 6px; width: 40px; height: 40px; border: 0; background: none; color: var(--muted); cursor: pointer; border-radius: 50%; display: grid; place-items: center; transition: background .15s ease; }
+.qx svg { stroke: currentColor; }
+.qx:active { background: var(--sunk); }
 .qmore { margin-top: 8px; display: flex; flex-direction: column; gap: 8px; align-items: flex-start; }
 .qmore .qlist { width: 100%; }
-.qtoggle, #copyall { padding-left: 0; min-height: 40px; }
-.nhist { margin-top: 16px; }
-.nh-item { padding: 8px 0; border-top: 1px solid var(--rule); }
-.nh-date { font: 600 13px/1.4 var(--sans); color: var(--muted); }
-.nh-text { margin: 4px 0 0; font: 15px/1.4 var(--sans); color: var(--soft); white-space: pre-wrap; }
+.qmore .qlist li { box-shadow: none; background: var(--sunk); }
+.qtoggle, #copyall { min-height: 40px; padding-left: 4px; font-size: 15px; }
+.nhist { margin-top: 18px; }
+.nhist:empty { display: none; }
+.nh-item { padding: 10px 4px; border-top: 1px solid var(--rule); }
+.nh-date { font: 600 13px/1.4 var(--ui); color: var(--muted); }
+.nh-text { margin: 4px 0 0; font: 15px/1.45 var(--ui); color: var(--soft); white-space: pre-wrap; overflow-wrap: anywhere; }
 
-/* ---- 11. hover · active · motion ---- */
+/* ---- 11. hover (pointer devices) · motion ---- */
 @media (hover: hover) and (pointer: fine) {
-  .tile:hover, .lrow:hover { border-color: var(--rule-strong); }
-  .send:hover, .hero:hover .cta { background: var(--accent-hover); }
-  .ghost:hover, .finishbtn:hover, #editbar button:hover { border-color: var(--accent); }
-  .demolink:hover { color: var(--accent-hover); }
-  #fab:hover, .pillbtn:hover { background: rgba(58,90,128,.16); }
+  .tile:hover, .lrow:hover, .slot:hover { box-shadow: var(--shadow), 0 0 0 1px var(--rule-strong); }
+  .send:hover, .hero:hover .cta { background: var(--accent-press); }
+  .ghost:hover, #fab:hover { background: var(--wash-2); }
+  .navrow:hover { background: var(--sunk); }
+  .back:hover, .reset:hover, .demolink:hover { opacity: .7; }
 }
-.tile:active, .lrow:active { border-color: var(--rule-strong); background: var(--bg); }
-.hero:active { filter: brightness(.98); }
-@media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition: none !important; animation: none !important; } }
 </style>
 
 <artifact-local>
@@ -297,14 +395,15 @@ textarea.nbox { width: 100%; min-height: 7.5rem; resize: vertical; font: 17px/1.
   </div>
 
   <button class="hero" type="button" onclick="go('pain'); playPain();">
-    <svg class="glyph" width="44" height="44" viewBox="0 0 44 44" fill="none" stroke-width="2.2" aria-hidden="true"><circle cx="22" cy="22" r="17"></circle><circle cx="22" cy="22" r="4" fill="#3A5A80" stroke="none"></circle></svg>
+    <svg class="glyph" width="44" height="44" viewBox="0 0 44 44" fill="none" stroke-width="1.8" aria-hidden="true"><circle class="halo" cx="22" cy="22" r="17"></circle><circle cx="22" cy="22" r="4" fill="currentColor" stroke="none"></circle></svg>
     <span class="hname ed" data-key="week.pain.name">Relationship to pain</span>
     <span class="hsub ed" data-key="week.pain.body">Four times a week. Become familiar and friendly with the feelings around the pain.</span>
-    <span class="cta"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4.5v15l12-7.5z"></path></svg><span class="ed" data-key="week.pain.cta">Emotional inquiry · 13 min</span></span>
+    <span class="cta"><svg width="15" height="15" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4.5v15l12-7.5z"></path></svg><span class="ed" data-key="week.pain.cta">Emotional inquiry · 13 min</span></span>
   </button>
 
   <div class="two">
     <button class="card tile" type="button" onclick="go('strength')">
+      <svg class="chev tchev" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 6 6 6-6 6"></path></svg>
       <span class="tname ed" data-key="week.strength.name">Strength</span>
       <span class="tsub ed" data-key="week.strength.body">Twice a week, about fifteen minutes.</span>
       <artifact-local><span class="tlast" id="st-tlast"></span></artifact-local>
@@ -317,10 +416,23 @@ textarea.nbox { width: 100%; min-height: 7.5rem; resize: vertical; font: 17px/1.
     </div>
   </div>
 
-  <div class="pills">
-    <button class="pillbtn" type="button" onclick="go('library')"><span class="ed" data-key="card.library.title">Library</span></button>
-    <button class="pillbtn" type="button" onclick="go('principles')"><span class="ed" data-key="card.principles.title">Principles</span></button>
-    <button class="pillbtn" type="button" onclick="go('note')"><span class="ed" data-key="card.note.title">Your notes</span></button>
+  <div class="card navlist">
+    <button class="navrow" type="button" onclick="go('library')">
+      <span class="nico"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 14v-2a8 8 0 0 1 16 0v2"></path><path d="M4 14h3v6H5a1 1 0 0 1-1-1zM20 14h-3v6h2a1 1 0 0 0 1-1z"></path></svg></span>
+      <span class="nlabel ed" data-key="card.library.title">Library</span>
+      <svg class="chev" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 6 6 6-6 6"></path></svg>
+    </button>
+    <button class="navrow" type="button" onclick="go('principles')">
+      <span class="nico"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="8"></circle><circle cx="12" cy="12" r="2.2" fill="currentColor" stroke="none"></circle></svg></span>
+      <span class="nlabel ed" data-key="card.principles.title">Principles</span>
+      <svg class="chev" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 6 6 6-6 6"></path></svg>
+    </button>
+    <button class="navrow" type="button" onclick="go('note')">
+      <span class="nico"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h4L19 9a2.1 2.1 0 0 0-4-4L4 16z"></path></svg></span>
+      <span class="nlabel ed" data-key="card.note.title">Your notes</span>
+      <artifact-local><span class="badge" id="notes-badge" hidden></span></artifact-local>
+      <svg class="chev" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 6 6 6-6 6"></path></svg>
+    </button>
   </div>
 
   <div class="card goal">
@@ -336,12 +448,12 @@ textarea.nbox { width: 100%; min-height: 7.5rem; resize: vertical; font: 17px/1.
 
 <!-- ================= RELATIONSHIP TO PAIN ================= -->
 <section id="screen-pain" class="screen">
-  <div class="topbar"><button class="back" type="button" onclick="go('home')">‹ Home</button></div>
+  <div class="topbar"><button class="back" type="button" onclick="go('home')"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m14.5 5.5-6.5 6.5 6.5 6.5"></path></svg>Home</button><span class="ctitle" aria-hidden="true"></span></div>
   <div class="stitle ed" role="heading" aria-level="2" data-key="pain.title">Relationship to pain</div>
   <p class="sintro ed" data-key="pain.intro">This week is about getting familiar. No need to fix anything: just meeting the feelings around pain with curiosity and kindness.</p>
 
   <div class="card paud">
-    <button class="play" id="pain-play" type="button" aria-label="Play"><svg class="ic-play" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4.5v15l12-7.5z"></path></svg><svg class="ic-pause" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 4.5h4.5v15H6zM13.5 4.5H18v15h-4.5z"></path></svg></button>
+    <button class="play" id="pain-play" type="button" aria-label="Play"><svg class="ic-play" width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4.5v15l12-7.5z"></path></svg><svg class="ic-pause" width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="4.5" width="4.4" height="15" rx="1.2"></rect><rect x="13.6" y="4.5" width="4.4" height="15" rx="1.2"></rect></svg></button>
     <div class="lbody">
       <div class="meta"><div class="exname ed" data-key="pain.full.name">Emotional inquiry</div><span class="dur ed" data-key="pain.full.dur">13 min</span></div>
       <div class="exbody ed" data-key="pain.full.what"></div>
@@ -382,7 +494,7 @@ textarea.nbox { width: 100%; min-height: 7.5rem; resize: vertical; font: 17px/1.
 
 <!-- ================= STRENGTH ================= -->
 <section id="screen-strength" class="screen">
-  <div class="topbar"><button class="back" type="button" onclick="go('home')">‹ Home</button></div>
+  <div class="topbar"><button class="back" type="button" onclick="go('home')"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m14.5 5.5-6.5 6.5 6.5 6.5"></path></svg>Home</button><span class="ctitle" aria-hidden="true"></span></div>
   <div class="stitle ed" role="heading" aria-level="2" data-key="st.title">Strength</div>
   <p class="sintro ed" data-key="st.intro">Four movements in two pairs. Twice a week, about fifteen minutes, wherever you are.</p>
   <artifact-local>
@@ -394,19 +506,19 @@ textarea.nbox { width: 100%; min-height: 7.5rem; resize: vertical; font: 17px/1.
     <div class="slot-head"><artifact-local><button class="ring" type="button" data-action="ring" aria-label="Mark done"></button></artifact-local><span class="slot-name ed" data-key="st.warm.name">Space Dragon + Small Dance</span><span class="slot-target ed" data-key="st.warm.target">8–10 breaths</span></div>
     <span class="slot-cue ed" data-key="st.warm.cue">Warm-up: ten breath cycles, then one minute of the small dance.</span>
     <artifact-local>
-    <div class="slot-foot"><button class="notebtn" type="button" data-action="note">✎ note</button></div>
+    <div class="slot-foot"><button class="notebtn" type="button" data-action="note"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h4L19 9a2.1 2.1 0 0 0-4-4L4 16z"></path></svg><span>Note</span></button></div>
     <div class="note-edit" hidden><textarea rows="2" data-action="notetext" placeholder="What happened?"></textarea></div>
     </artifact-local>
   </div>
   <div class="pairmat" data-pair="1">
-    <div class="pairtag"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><path d="M7 8h13m0 0-3-3m3 3-3 3M17 16H4m0 0 3-3m-3 3 3 3"></path></svg><span class="ed" data-key="st.p1.tag">Pair · alternate sets</span><span>· rest <span data-pairrest>0:30</span> between</span></div>
+    <div class="pairtag"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 8h13m0 0-3-3m3 3-3 3M17 16H4m0 0 3-3m-3 3 3 3"></path></svg><span class="ed" data-key="st.p1.tag">Pair · alternate sets</span><span>· rest <span data-pairrest>0:30</span> between</span></div>
   <div class="slot" data-mv="stork" data-sets="2">
     <div class="slot-head"><artifact-local><button class="ring" type="button" data-action="ring" aria-label="Mark done"></button></artifact-local><span class="slot-name ed" data-key="st.stork.name">Stork squat</span><span class="slot-target ed" data-key="st.stork.target">2×8–12 /side</span></div>
     <span class="slot-cue ed" data-key="st.stork.cue">Pelvis level, knee tracking over the foot</span>
-    <a class="demolink" href="https://youtu.be/f4uz9jq5xnE" target="_blank" rel="noopener">Watch the form demo · 1:00 ↗</a>
+    <a class="demolink" href="https://youtu.be/f4uz9jq5xnE" target="_blank" rel="noopener"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M10.2 8.6v6.8l5.2-3.4z" fill="currentColor" stroke="none"></path></svg>Watch the form demo · 1:00</a>
     <artifact-local><div class="setline hidden" data-setline></div></artifact-local>
     <artifact-local>
-    <div class="slot-foot"><button class="notebtn" type="button" data-action="note">✎ note</button></div>
+    <div class="slot-foot"><button class="notebtn" type="button" data-action="note"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h4L19 9a2.1 2.1 0 0 0-4-4L4 16z"></path></svg><span>Note</span></button></div>
     <div class="note-edit" hidden><textarea rows="2" data-action="notetext" placeholder="What happened?"></textarea></div>
     </artifact-local>
   </div>
@@ -415,20 +527,20 @@ textarea.nbox { width: 100%; min-height: 7.5rem; resize: vertical; font: 17px/1.
     <span class="slot-cue ed" data-key="st.pushup.cue">Three seconds on the way down, leaving two or three reps in reserve.</span>
     <artifact-local><div class="setline hidden" data-setline></div></artifact-local>
     <artifact-local>
-    <div class="slot-foot"><button class="notebtn" type="button" data-action="note">✎ note</button></div>
+    <div class="slot-foot"><button class="notebtn" type="button" data-action="note"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h4L19 9a2.1 2.1 0 0 0-4-4L4 16z"></path></svg><span>Note</span></button></div>
     <div class="note-edit" hidden><textarea rows="2" data-action="notetext" placeholder="What happened?"></textarea></div>
     </artifact-local>
   </div>
   </div>
   <div class="pairmat" data-pair="2">
-    <div class="pairtag"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><path d="M7 8h13m0 0-3-3m3 3-3 3M17 16H4m0 0 3-3m-3 3 3 3"></path></svg><span class="ed" data-key="st.p2.tag">Pair · alternate sets</span><span>· rest <span data-pairrest>0:30</span> between</span></div>
+    <div class="pairtag"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 8h13m0 0-3-3m3 3-3 3M17 16H4m0 0 3-3m-3 3 3 3"></path></svg><span class="ed" data-key="st.p2.tag">Pair · alternate sets</span><span>· rest <span data-pairrest>0:30</span> between</span></div>
   <div class="slot" data-mv="hinge" data-sets="2">
     <div class="slot-head"><artifact-local><button class="ring" type="button" data-action="ring" aria-label="Mark done"></button></artifact-local><span class="slot-name ed" data-key="st.hinge.name">Kickstand Hinge</span><span class="slot-target ed" data-key="st.hinge.target">2×8–12 /side</span></div>
     <span class="slot-cue ed" data-key="st.hinge.cue">Using a weight or backpack. Flat back, knees over feet.</span>
-    <a class="demolink" href="https://youtu.be/8VfPrhl_N3o" target="_blank" rel="noopener">Watch the form demo · 0:50 ↗</a>
+    <a class="demolink" href="https://youtu.be/8VfPrhl_N3o" target="_blank" rel="noopener"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M10.2 8.6v6.8l5.2-3.4z" fill="currentColor" stroke="none"></path></svg>Watch the form demo · 0:50</a>
     <artifact-local><div class="setline hidden" data-setline></div></artifact-local>
     <artifact-local>
-    <div class="slot-foot"><button class="notebtn" type="button" data-action="note">✎ note</button></div>
+    <div class="slot-foot"><button class="notebtn" type="button" data-action="note"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h4L19 9a2.1 2.1 0 0 0-4-4L4 16z"></path></svg><span>Note</span></button></div>
     <div class="note-edit" hidden><textarea rows="2" data-action="notetext" placeholder="What happened?"></textarea></div>
     </artifact-local>
   </div>
@@ -436,10 +548,10 @@ textarea.nbox { width: 100%; min-height: 7.5rem; resize: vertical; font: 17px/1.
     <div class="slot-head"><artifact-local><button class="ring" type="button" data-action="ring" aria-label="Mark done"></button></artifact-local><span class="slot-name ed" data-key="st.row.name">One-arm row</span><span class="slot-target ed" data-key="st.row.target">2×8–12 /side</span></div>
     <span class="slot-cue ed" data-key="st.row.cue">Backpack loaded with your home weights. Three seconds up, three down.</span>
     <span class="slot-sub ed" data-key="st.row.sub">When you can do 12 with reps to spare, add a little weight to the bag.</span>
-    <a class="demolink" href="https://youtu.be/xra8y8R2FlU" target="_blank" rel="noopener">Watch the form demo · 0:53 ↗</a>
+    <a class="demolink" href="https://youtu.be/xra8y8R2FlU" target="_blank" rel="noopener"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M10.2 8.6v6.8l5.2-3.4z" fill="currentColor" stroke="none"></path></svg>Watch the form demo · 0:53</a>
     <artifact-local><div class="setline hidden" data-setline></div></artifact-local>
     <artifact-local>
-    <div class="slot-foot"><button class="notebtn" type="button" data-action="note">✎ note</button></div>
+    <div class="slot-foot"><button class="notebtn" type="button" data-action="note"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h4L19 9a2.1 2.1 0 0 0-4-4L4 16z"></path></svg><span>Note</span></button></div>
     <div class="note-edit" hidden><textarea rows="2" data-action="notetext" placeholder="What happened?"></textarea></div>
     </artifact-local>
   </div>
@@ -448,7 +560,7 @@ textarea.nbox { width: 100%; min-height: 7.5rem; resize: vertical; font: 17px/1.
     <div class="slot-head"><artifact-local><button class="ring" type="button" data-action="ring" aria-label="Mark done"></button></artifact-local><span class="slot-name ed" data-key="st.floor.name">The floor game</span><span class="slot-target ed" data-key="st.floor.target">as long as you like</span></div>
     <span class="slot-cue ed" data-key="st.floor.cue">Finish with the squat-floor game you already do, for as long as you're enjoying it.</span>
     <artifact-local>
-    <div class="slot-foot"><button class="notebtn" type="button" data-action="note">✎ note</button></div>
+    <div class="slot-foot"><button class="notebtn" type="button" data-action="note"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h4L19 9a2.1 2.1 0 0 0-4-4L4 16z"></path></svg><span>Note</span></button></div>
     <div class="note-edit" hidden><textarea rows="2" data-action="notetext" placeholder="What happened?"></textarea></div>
     </artifact-local>
   </div>
@@ -473,11 +585,13 @@ textarea.nbox { width: 100%; min-height: 7.5rem; resize: vertical; font: 17px/1.
 
   <div class="sec">
     <p class="lbl ed" data-key="st.hist.label">Past sessions</p>
-    <p class="footnote ed" id="st-empty" data-key="st.hist.empty" style="margin-top:0">Nothing here yet — your first finished session lands here.</p>
+    <p class="footnote ed" id="st-empty" data-key="st.hist.empty" style="margin:0 4px">Nothing here yet — your first finished session lands here.</p>
     <artifact-local>
-    <div id="st-hist"></div>
-    <div class="setrow"><span class="setlabel">Rest</span><span class="seg" id="st-restseg"><button type="button" data-rest="30">30 s</button><button type="button" data-rest="45">45 s</button><button type="button" data-rest="60">60 s</button></span></div>
-    <div class="setrow"><span class="setlabel">Your data</span><button class="ghost" id="st-copy" type="button">Copy</button><button class="ghost" id="st-import" type="button">Import</button><button class="ghost danger" id="st-erase" type="button">Erase</button><span class="nstatus" id="st-dstatus"></span></div>
+    <div class="card histcard" id="st-hist"></div>
+    <div class="card settings">
+      <div class="setrow"><span class="setlabel">Rest</span><span class="seg" id="st-restseg"><button type="button" data-rest="30">30 s</button><button type="button" data-rest="45">45 s</button><button type="button" data-rest="60">60 s</button></span></div>
+      <div class="setrow"><span class="setlabel">Your data</span><button class="ghost" id="st-copy" type="button">Copy</button><button class="ghost" id="st-import" type="button">Import</button><button class="ghost danger" id="st-erase" type="button">Erase</button><span class="nstatus" id="st-dstatus"></span></div>
+    </div>
     <div class="finish-wrap" id="st-importbox" hidden><textarea class="nbox" id="st-importtext" placeholder="Paste a copied Practice Map strength export here. Replaces everything."></textarea><div class="send-row"><button class="send" id="st-import-load" type="button">Load</button><button class="ghost" id="st-import-cancel" type="button">Cancel</button></div></div>
     <p class="version" id="st-version"></p>
     </artifact-local>
@@ -486,10 +600,11 @@ textarea.nbox { width: 100%; min-height: 7.5rem; resize: vertical; font: 17px/1.
 
 <!-- ================= LIBRARY ================= -->
 <section id="screen-library" class="screen">
-  <div class="topbar"><button class="back" type="button" onclick="go('home')">‹ Home</button></div>
+  <div class="topbar"><button class="back" type="button" onclick="go('home')"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m14.5 5.5-6.5 6.5 6.5 6.5"></path></svg>Home</button><span class="ctitle" aria-hidden="true"></span></div>
   <div class="stitle ed" role="heading" aria-level="2" data-key="library.title">Library</div>
   <p class="sintro ed" data-key="library.intro">Practice recordings.</p>
   <button class="card lrow" type="button" onclick="go('lesson')">
+    <span class="lico solid"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4.5v15l12-7.5z"></path></svg></span>
     <span class="lbody">
       <span class="exname ed" data-key="lib.jtp.name">Jaw, Tongue &amp; Pelvis</span>
       <span class="exbody ed" data-key="lib.jtp.what">Sensing that your pelvis and spine, your head, neck and jaw are all part of one integrated system.</span>
@@ -497,36 +612,39 @@ textarea.nbox { width: 100%; min-height: 7.5rem; resize: vertical; font: 17px/1.
     <span class="go">Listen · 33 min</span>
   </button>
   <a class="card lrow" href="https://youtu.be/kOFQGXPjXrY" target="_blank" rel="noopener">
+    <span class="lico"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5.5" width="18" height="13" rx="3.5"></rect><path d="M10.5 9.6v4.8l4-2.4z" fill="currentColor" stroke="none"></path></svg></span>
     <span class="lbody">
       <span class="exname ed" data-key="lib.1.name">Attuning to Spaciousness While Moving</span>
       <span class="exbody ed" data-key="lib.1.what">Finding the space that is always available by inhabiting your body in the environment.</span>
     </span>
-    <span class="go">Listen ↗</span>
+    <span class="go">Listen on YouTube<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 16 16 8M9 8h7v7"></path></svg></span>
   </a>
   <a class="card lrow" href="https://youtu.be/GnDqNwKVMtM" target="_blank" rel="noopener">
+    <span class="lico"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5.5" width="18" height="13" rx="3.5"></rect><path d="M10.5 9.6v4.8l4-2.4z" fill="currentColor" stroke="none"></path></svg></span>
     <span class="lbody">
       <span class="exname ed" data-key="lib.2.name">Connecting Pelvis and Head</span>
       <span class="exbody ed" data-key="lib.2.what">Experiencing your pelvis and head as intimately connected via the communication channel of the spine.</span>
     </span>
-    <span class="go">Listen ↗</span>
+    <span class="go">Listen on YouTube<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 16 16 8M9 8h7v7"></path></svg></span>
   </a>
   <a class="card lrow" href="https://youtu.be/JyaOVCCcAa8" target="_blank" rel="noopener">
+    <span class="lico"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5.5" width="18" height="13" rx="3.5"></rect><path d="M10.5 9.6v4.8l4-2.4z" fill="currentColor" stroke="none"></path></svg></span>
     <span class="lbody">
       <span class="exname ed" data-key="lib.3.name">Everything Communicates</span>
       <span class="exbody ed" data-key="lib.3.what">When one part of the body moves, the whole body responds.</span>
     </span>
-    <span class="go">Listen ↗</span>
+    <span class="go">Listen on YouTube<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 16 16 8M9 8h7v7"></path></svg></span>
   </a>
 </section>
 
 <!-- ================= LESSON · JAW, TONGUE & PELVIS (from the Library) ================= -->
 <section id="screen-lesson" class="screen">
-  <div class="topbar"><button class="back" type="button" onclick="go('library')">‹ Library</button></div>
+  <div class="topbar"><button class="back" type="button" onclick="go('library')"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m14.5 5.5-6.5 6.5 6.5 6.5"></path></svg>Library</button><span class="ctitle" aria-hidden="true"></span></div>
   <div class="stitle ed" role="heading" aria-level="2" data-key="lesson.jtp.title">Jaw, Tongue &amp; Pelvis</div>
   <p class="sintro ed" data-key="lesson.jtp.intro">The lesson from our session on September 10th, as we did it.</p>
 
   <div class="card paud">
-    <button class="play" id="lesson-play" type="button" aria-label="Play"><svg class="ic-play" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4.5v15l12-7.5z"></path></svg><svg class="ic-pause" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 4.5h4.5v15H6zM13.5 4.5H18v15h-4.5z"></path></svg></button>
+    <button class="play" id="lesson-play" type="button" aria-label="Play"><svg class="ic-play" width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4.5v15l12-7.5z"></path></svg><svg class="ic-pause" width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="4.5" width="4.4" height="15" rx="1.2"></rect><rect x="13.6" y="4.5" width="4.4" height="15" rx="1.2"></rect></svg></button>
     <div class="lbody">
       <div class="meta"><div class="exname ed" data-key="lesson.jtp.name">Jaw, Tongue &amp; Pelvis</div><span class="dur ed" data-key="lesson.jtp.dur">33 min</span></div>
       <div class="exbody ed" data-key="lesson.jtp.what">Lying on your back. Small movements of the jaw and tongue, then the same movements joined to the head and to the tilting of the pelvis.</div>
@@ -549,20 +667,23 @@ textarea.nbox { width: 100%; min-height: 7.5rem; resize: vertical; font: 17px/1.
 
 <!-- ================= PRINCIPLES ================= -->
 <section id="screen-principles" class="screen">
-  <div class="topbar"><button class="back" type="button" onclick="go('home')">‹ Home</button></div>
+  <div class="topbar"><button class="back" type="button" onclick="go('home')"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m14.5 5.5-6.5 6.5 6.5 6.5"></path></svg>Home</button><span class="ctitle" aria-hidden="true"></span></div>
   <div class="stitle ed" role="heading" aria-level="2" data-key="principles.title">Principles</div>
   <p class="sintro ed" data-key="principles.intro">Just a few things that have resonated along the way.</p>
-  <div class="card prow"><span class="ed" data-key="p.1">One part moves, everything responds.</span><small class="ed" data-key="p.1.src">Everything Communicates</small></div>
-  <div class="card prow"><span class="ed" data-key="p.2">Decrease the effort to sense finer differences.</span></div>
-  <div class="card prow"><span class="ed" data-key="p.3">An uninterrupted breath can be a barometer of unnecessary effort.</span><small class="ed" data-key="p.3.src">Tilting the Triangle</small></div>
-  <div class="card prow"><span class="ed" data-key="p.7">The best position is the next position.</span><small class="ed" data-key="p.7.src">Movement snacks and posture at work</small></div>
+  <div class="card plist">
+    <div class="prow"><span class="ed" data-key="p.1">One part moves, everything responds.</span><small class="ed" data-key="p.1.src">Everything Communicates</small></div>
+    <div class="prow"><span class="ed" data-key="p.2">Decrease the effort to sense finer differences.</span></div>
+    <div class="prow"><span class="ed" data-key="p.3">An uninterrupted breath can be a barometer of unnecessary effort.</span><small class="ed" data-key="p.3.src">Tilting the Triangle</small></div>
+    <div class="prow"><span class="ed" data-key="p.7">The best position is the next position.</span><small class="ed" data-key="p.7.src">Movement snacks and posture at work</small></div>
+  </div>
 </section>
 
 <!-- ================= YOUR NOTES ================= -->
 <section id="screen-note" class="screen">
-  <div class="topbar"><button class="back" type="button" onclick="go('home')">‹ Home</button><artifact-local><button class="reset" type="button" onclick="clearNote()">Clear draft</button></artifact-local></div>
+  <div class="topbar"><button class="back" type="button" onclick="go('home')"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m14.5 5.5-6.5 6.5 6.5 6.5"></path></svg>Home</button><span class="ctitle" aria-hidden="true"></span><artifact-local><button class="reset" type="button" onclick="clearNote()">Clear draft</button></artifact-local></div>
   <div class="stitle ed" role="heading" aria-level="2" data-key="note.title">Your notes</div>
   <p class="sintro ed" data-key="note.intro">Feel free to share me any notes that come up.</p>
+  <div class="note-compose">
   <p class="lbl ed" data-key="note.compose.label">What are you noticing?</p>
   <artifact-local>
     <textarea class="nbox" id="note-main" placeholder="This week…"></textarea>
@@ -573,10 +694,11 @@ textarea.nbox { width: 100%; min-height: 7.5rem; resize: vertical; font: 17px/1.
     </div>
     <div class="nhist" id="nhist"></div>
   </artifact-local>
+  </div>
   <p class="lbl psec ed" data-key="note.list.label">Notes you've added</p>
   <artifact-local>
-    <p class="footnote" id="qempty" style="margin-top:0">Nothing yet — tap + on any screen to jot one. Notes from a strength session land here too.</p>
-    <p class="footnote" id="qnone" style="margin-top:0" hidden>Nothing new since you last shared.</p>
+    <p class="footnote" id="qempty" style="margin:0 4px">Nothing yet — tap + on any screen to jot one. Notes from a strength session land here too.</p>
+    <p class="footnote" id="qnone" style="margin:0 4px" hidden>Nothing new since you last shared.</p>
     <ul class="qlist" id="qlist"></ul>
     <div class="qmore" id="qmore"></div>
     <button class="reset" id="copyall" type="button" hidden>Copy all notes</button>
@@ -586,7 +708,8 @@ textarea.nbox { width: 100%; min-height: 7.5rem; resize: vertical; font: 17px/1.
 
 </main>
 
-<button id="fab" type="button" artifact-local aria-controls="sheet" aria-expanded="false" aria-label="Quick note"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg></button>
+<div id="scrim" artifact-local hidden></div>
+<button id="fab" type="button" artifact-local aria-controls="sheet" aria-expanded="false" aria-label="Quick note"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg></button>
 <div id="sheet" artifact-local hidden>
   <p class="lbl" id="sheet-lbl">Quick note</p>
   <textarea id="sheet-text" placeholder="What did you notice?"></textarea>
@@ -597,6 +720,33 @@ textarea.nbox { width: 100%; min-height: 7.5rem; resize: vertical; font: 17px/1.
 </div>
 
 <script>
+/* ---------- feel: haptics, pressed states, the condensing bar ----------
+   haptic(): a light tick on ring taps and quick-note saves. Android uses vibrate; iPhone (iOS 18+) gets its
+   tick from toggling a hidden switch control, the only haptic Safari exposes. Silent everywhere else. */
+var hapLabel = null;
+function haptic() {
+  try {
+    if (navigator.vibrate) { navigator.vibrate(10); return; }
+    if (!hapLabel) {
+      hapLabel = document.createElement('label'); hapLabel.setAttribute('aria-hidden', 'true');
+      hapLabel.style.cssText = 'position:fixed;width:1px;height:1px;overflow:hidden;opacity:0;pointer-events:none;';
+      var i = document.createElement('input'); i.type = 'checkbox'; i.setAttribute('switch', ''); i.tabIndex = -1;
+      hapLabel.appendChild(i); document.body.appendChild(hapLabel);
+    }
+    hapLabel.click();
+  } catch (e) {}
+}
+document.addEventListener('touchstart', function () {}, { passive: true }); /* lets :active press states show on iPhone */
+function activeScreen() { return SCREENS.filter(function (s) { return document.getElementById('screen-' + s).hasAttribute('data-local-active'); })[0] || 'home'; }
+function barTitle() {
+  var s = document.getElementById('screen-' + activeScreen()); if (!s) return;
+  var t = s.querySelector('.stitle'), c = s.querySelector('.ctitle');
+  if (t && c) c.textContent = t.textContent.replace(/\s+/g, ' ').trim();
+}
+var scrolledNow = false;
+function onScroll() { var on = window.scrollY > 44; if (on !== scrolledNow) { scrolledNow = on; document.body.classList.toggle('scrolled', on); } }
+window.addEventListener('scroll', onScroll, { passive: true });
+function stFinishReady() { var b = document.getElementById('st-finish'); if (b && typeof stDoneCount === 'function') b.classList.toggle('ready', stDoneCount() > 0); }
 /* ---------- navigation (per-viewer) ---------- */
 var SCREENS = ['home', 'pain', 'strength', 'library', 'lesson', 'principles', 'note'];
 function go(name, force) {
@@ -607,6 +757,7 @@ function go(name, force) {
   });
   document.querySelectorAll('#edn button[data-go]').forEach(function (b) { b.classList.toggle('on', b.getAttribute('data-go') === name); });
   window.scrollTo(0, 0);
+  barTitle(); onScroll();
 }
 /* ---------- practice players (one control each: the round button; native controls hidden) ----------
    Two players share this code: the pain screen (pain-*) and the Library lesson (lesson-*). Starting one
@@ -642,10 +793,10 @@ function bindPlayer(prefix, nameKey, creditKey, defaultName) {
   });
   function seekTo(x) { var r = prog.getBoundingClientRect(); var f = Math.max(0, Math.min(1, (x - r.left) / r.width)); if (a.duration) { a.currentTime = f * a.duration; paint(); } }
   var drag = false;
-  prog.addEventListener('pointerdown', function (e) { drag = true; try { prog.setPointerCapture(e.pointerId); } catch (err) {} seekTo(e.clientX); });
+  prog.addEventListener('pointerdown', function (e) { drag = true; prog.classList.add('drag'); try { prog.setPointerCapture(e.pointerId); } catch (err) {} seekTo(e.clientX); });
   prog.addEventListener('pointermove', function (e) { if (drag) seekTo(e.clientX); });
-  prog.addEventListener('pointerup', function () { drag = false; });
-  prog.addEventListener('pointercancel', function () { drag = false; });
+  prog.addEventListener('pointerup', function () { drag = false; prog.classList.remove('drag'); });
+  prog.addEventListener('pointercancel', function () { drag = false; prog.classList.remove('drag'); });
   prog.addEventListener('keydown', function (e) { if (!a.duration) return; if (e.key === 'ArrowRight') { a.currentTime = Math.min(a.duration, a.currentTime + 15); paint(); } if (e.key === 'ArrowLeft') { a.currentTime = Math.max(0, a.currentTime - 15); paint(); } });
   paint();
   PLAYERS.push(a);
@@ -724,7 +875,7 @@ function pushRemote() {
 }
 EDS.forEach(function (el) {
   el.addEventListener('input', function () {
-    dirty = true;
+    dirty = true; barTitle();
     try { localStorage.setItem(CKEY, JSON.stringify(collect())); } catch (e) {}
     note('saved on this device', true);
     clearTimeout(pubT); pubT = setTimeout(pushRemote, 2500);
@@ -776,7 +927,7 @@ function noteItem(n, sharedFlag) {
   if (n.ctx) { var c = document.createElement('span'); c.className = 'qctx'; c.textContent = n.ctx; head.appendChild(c); }
   var t = document.createElement('div'); t.className = 'qt'; t.textContent = n.t;
   li.appendChild(head); li.appendChild(t);
-  if (!n.ro) { var x = document.createElement('button'); x.type = 'button'; x.className = 'qx'; x.title = 'Remove'; x.setAttribute('aria-label', 'Remove note'); x.textContent = '×'; x.onclick = function () { quick.splice(n.i, 1); saveQuick(); renderNotes(); }; li.appendChild(x); }
+  if (!n.ro) { var x = document.createElement('button'); x.type = 'button'; x.className = 'qx'; x.title = 'Remove'; x.setAttribute('aria-label', 'Remove note'); x.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"></path></svg>'; x.onclick = function () { quick.splice(n.i, 1); saveQuick(); renderNotes(); }; li.appendChild(x); }
   return li;
 }
 /* new since the last share on top; everything already shared folds behind "Show earlier" */
@@ -798,19 +949,23 @@ function renderNotes() {
     }
   }
   var ca = document.getElementById('copyall'); if (ca) ca.hidden = notes.length === 0;
+  var bd = document.getElementById('notes-badge'); if (bd) { bd.textContent = fresh.length ? String(fresh.length) : ''; bd.hidden = !fresh.length; bd.setAttribute('aria-label', fresh.length + ' new'); }
 }
 function renderQuick() { renderNotes(); }
 renderNotes();
 var fab = document.getElementById('fab'), sheet = document.getElementById('sheet'), ta = document.getElementById('sheet-text'), sheetLbl = document.getElementById('sheet-lbl'), sheetCtx = '';
+var scrim = document.getElementById('scrim');
 function openSheet(on) {
-  sheet.hidden = !on; fab.setAttribute('aria-expanded', on ? 'true' : 'false');
+  sheet.hidden = !on; scrim.hidden = !on; fab.setAttribute('aria-expanded', on ? 'true' : 'false');
   if (on) { sheetCtx = screenLabel(); if (sheetLbl) sheetLbl.textContent = 'Quick note · ' + sheetCtx; ta.focus(); }
 }
 fab.onclick = function () { openSheet(sheet.hidden); };
+scrim.onclick = function () { openSheet(false); };
+document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && !sheet.hidden) openSheet(false); });
 document.getElementById('sheet-cancel').onclick = function () { ta.value = ''; openSheet(false); };
 document.getElementById('sheet-save').onclick = function () {
   var t = ta.value.trim(); if (!t) { openSheet(false); return; }
-  quick.push({ d: today(), ts: Date.now(), t: t, ctx: sheetCtx }); saveQuick(); renderNotes(); ta.value = ''; openSheet(false);
+  quick.push({ d: today(), ts: Date.now(), t: t, ctx: sheetCtx }); saveQuick(); haptic(); renderNotes(); ta.value = ''; openSheet(false);
 };
 function compile(all) {
   var parts = [];
@@ -902,7 +1057,7 @@ function stPaintSlot(el) {
       var off = ST_CIRC * (1 - n / total);
       ring.className = 'ring counting' + (done ? ' on' : '');
       ring.setAttribute('aria-label', done ? 'Reset sets' : 'Count one set');
-      ring.innerHTML = '<svg viewBox="0 0 25 25" aria-hidden="true"><circle class="ring-track" cx="12.5" cy="12.5" r="10.5"></circle><circle class="ring-arc" cx="12.5" cy="12.5" r="10.5" style="stroke-dasharray:' + ST_CIRC.toFixed(2) + ';stroke-dashoffset:' + off.toFixed(2) + '"></circle></svg><span class="ring-count">' + (done ? '✓' : (n || '')) + '</span>';
+      ring.innerHTML = '<svg viewBox="0 0 25 25" aria-hidden="true"><circle class="ring-track" cx="12.5" cy="12.5" r="10.5"></circle><circle class="ring-arc" cx="12.5" cy="12.5" r="10.5" style="stroke-dasharray:' + ST_CIRC.toFixed(2) + ';stroke-dashoffset:' + off.toFixed(2) + '"></circle></svg><span class="ring-count">' + (done ? '' : (n || '')) + '</span>';
       var line = el.querySelector('[data-setline]');
       if (line) { line.textContent = 'Set ' + n + ' of ' + total + ' down'; line.classList.toggle('hidden', !n); }
     }
@@ -932,6 +1087,7 @@ function stRender() {
   if (ver) ver.textContent = 'v' + ST_VERSION + ' · ' + st.sessions.length + ' session' + (st.sessions.length === 1 ? '' : 's') + ' logged · saved on this device';
   var tl = document.getElementById('st-tlast');
   if (tl) { var last = st.sessions[st.sessions.length - 1]; tl.textContent = last ? 'Last: ' + stDate(last.endedAt) : 'No sessions yet'; }
+  stFinishReady();
   if (typeof renderNotes === 'function') renderNotes();
 }
 
@@ -957,7 +1113,7 @@ function stDockHTML() {
   if (stRest.running) {
     var left = (stRest.endsAt - Date.now()) / 1000;
     var pct = Math.max(0, Math.min(100, (1 - left / stRest.total) * 100));
-    return '<div class="rest-running"><div class="rest-fill" data-rest-fill style="width:' + pct + '%"></div><div class="rest-row"><div class="rest-time" data-rest-time>' + stMMSS(left) + '</div><span class="rest-label" data-rest-label></span><button class="rest-mini" type="button" data-action="rest-restart" aria-label="Restart rest">↻</button><button class="rest-mini" type="button" data-action="rest-cancel" aria-label="Cancel rest">✕</button></div></div>';
+    return '<div class="rest-running"><div class="rest-fill" data-rest-fill style="width:' + pct + '%"></div><div class="rest-row"><div class="rest-time" data-rest-time>' + stMMSS(left) + '</div><span class="rest-label" data-rest-label></span><button class="rest-mini" type="button" data-action="rest-restart" aria-label="Restart rest"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12a8 8 0 1 0 2.4-5.7M4 4.5v4h4"></path></svg></button><button class="rest-mini" type="button" data-action="rest-cancel" aria-label="Cancel rest"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"></path></svg></button></div></div>';
   }
   if (stRest.done) return '<button class="rest-done" type="button" data-action="rest-ack">Rest done — go</button>';
   return '';
@@ -983,7 +1139,7 @@ function stRestStart(label) {
 function stRestCancel() { stStopTick(); stRest.running = false; stRest.done = false; stWake(false); stRenderDock(); }
 function stRestFinish() {
   stStopTick(); stRest.running = false; stRest.done = true; stWake(false);
-  try { if (navigator.vibrate) navigator.vibrate([220, 120, 220, 120, 320]); } catch (e) {}
+  try { if (navigator.vibrate) navigator.vibrate([220, 120, 220, 120, 320]); else haptic(); } catch (e) {}
   stRenderDock();
   stRest.doneT = setTimeout(function () { if (stRest.done && !stRest.running) { stRest.done = false; stRenderDock(); } }, 4000);
 }
@@ -1002,7 +1158,7 @@ document.getElementById('screen-strength').addEventListener('click', function (e
       if (e.done) { delete e.done; delete e.sets; }
       else { e.sets = Math.min((e.sets || 0) + 1, total); if (e.sets >= total) e.done = true; stRestStart(stRestLabelFor(e.sets, total)); }
     } else if (e.done) { delete e.done; } else { e.done = true; }
-    stSave(); stPaintSlot(slot); stPaintMats(); stTrail();
+    haptic(); stSave(); stPaintSlot(slot); stPaintMats(); stTrail(); stFinishReady();
     return;
   }
   if (action === 'note') { var box = slot.querySelector('.note-edit'); box.hidden = !box.hidden; if (!box.hidden) box.querySelector('textarea').focus(); }
@@ -1049,8 +1205,8 @@ function stRecap() {
     var name = stText(el, '.slot-name');
     if (total) {
       var n = e && e.done ? total : Math.min((e && e.sets) || 0, total);
-      rows.push('<div class="rrow"><span class="rrow-name">' + name + (noted ? '<i class="rrow-note">✎</i>' : '') + '</span><span class="rrow-num">' + (n ? n + ' of ' + total + ' sets' : '—') + '</span></div>');
-    } else if (noted || (e && e.done)) extras.push(name + (e && e.done ? ' ✓' : '') + (noted ? ' ✎' : ''));
+      rows.push('<div class="rrow"><span class="rrow-name">' + name + (noted ? '<i class="rrow-note">note</i>' : '') + '</span><span class="rrow-num">' + (n ? n + ' of ' + total + ' sets' : '—') + '</span></div>');
+    } else if (noted || (e && e.done)) extras.push(name + (e && e.done ? ' ✓' : '') + (noted ? ' · note' : ''));
   });
   document.getElementById('st-recap').innerHTML = rows.join('') + (extras.length ? '<div class="recap-extra"></div>' : '');
   var ex = document.querySelector('#st-recap .recap-extra'); if (ex) ex.textContent = extras.join(' · ');
@@ -1112,5 +1268,5 @@ document.getElementById('st-erase').onclick = function () {
   stEraseArmed = false; b.textContent = 'Erase'; st = stDefault(); stSave(); stRestCancel(); stRender(); stFlash(stD, 'Erased');
 };
 window.addEventListener('pageshow', function (e) { if (e.persisted) stAutoFinish(); });
-stAutoFinish(); stRender();
+stAutoFinish(); stRender(); barTitle();
 </script>
